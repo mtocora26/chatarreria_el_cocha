@@ -21,5 +21,5 @@ export async function registrarVentaAccion(
   if (!resultado.ok) return { errores: resultado.error };
 
   revalidatePath("/", "layout");
-  redirect(`/ventas?registrada=${resultado.valor.consecutivo}`);
+  redirect(`/recibos/${resultado.valor.id}?nuevo=1`);
 }

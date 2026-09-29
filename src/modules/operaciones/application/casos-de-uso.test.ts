@@ -39,6 +39,7 @@ function preparar(stockDisponible = new Map<string, number>()) {
       return { ok: true, valor: { id: "id", consecutivo: guardadas.length } };
     },
     consultarStock: async () => stockDisponible,
+    obtenerDetalle: async () => null,
     listarRecientes: async () => [],
   };
   const casos = crearCasosDeUsoOperaciones(repositorio, {

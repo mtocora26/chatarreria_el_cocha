@@ -11,10 +11,9 @@ import { registrarVentaAccion } from "./acciones";
 
 export const metadata: Metadata = { title: "Ventas" };
 
-export default async function PaginaVentas({ searchParams }: PageProps<"/ventas">) {
+export default async function PaginaVentas() {
   await connection();
-  const [{ registrada }, activos, stock, recientes] = await Promise.all([
-    searchParams,
+  const [activos, stock, recientes] = await Promise.all([
     materiales.listarMaterialesActivos(),
     operaciones.consultarStock(),
     operaciones.listarRecientes("venta"),
@@ -26,9 +25,6 @@ export default async function PaginaVentas({ searchParams }: PageProps<"/ventas"
         titulo="Ventas"
         descripcion="Registrar material vendido sin dejar stock negativo."
       />
-      {typeof registrada === "string" && (
-        <Aviso tipo="exito">Venta N.º {registrada} registrada.</Aviso>
-      )}
       {activos.length === 0 ? (
         <Aviso tipo="error">
           No hay materiales activos.{" "}

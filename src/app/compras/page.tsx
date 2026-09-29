@@ -11,10 +11,9 @@ import { registrarCompraAccion } from "./acciones";
 
 export const metadata: Metadata = { title: "Compras" };
 
-export default async function PaginaCompras({ searchParams }: PageProps<"/compras">) {
+export default async function PaginaCompras() {
   await connection();
-  const [{ registrada }, activos, recientes] = await Promise.all([
-    searchParams,
+  const [activos, recientes] = await Promise.all([
     materiales.listarMaterialesActivos(),
     operaciones.listarRecientes("compra"),
   ]);
@@ -25,9 +24,6 @@ export default async function PaginaCompras({ searchParams }: PageProps<"/compra
         titulo="Compras"
         descripcion="Registrar material comprado con su peso y precio."
       />
-      {typeof registrada === "string" && (
-        <Aviso tipo="exito">Compra N.º {registrada} registrada.</Aviso>
-      )}
       {activos.length === 0 ? (
         <Aviso tipo="error">
           No hay materiales activos.{" "}

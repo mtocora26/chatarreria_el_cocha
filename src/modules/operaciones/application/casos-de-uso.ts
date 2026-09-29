@@ -1,4 +1,5 @@
-import type { Material } from "@/modules/materiales/domain/material";
+import type { Material, Tarifa } from "@/modules/materiales/domain/material";
+import { z } from "zod";
 import type { Pesos } from "@/shared/dominio/dinero";
 import { formatearKg, type Gramos } from "@/shared/dominio/peso";
 import { exito, fallo, type Resultado } from "@/shared/dominio/resultado";
@@ -21,6 +22,20 @@ import {
 
 export type OperacionGuardada = { id: string; consecutivo: number };
 
+export type DetalleOperacion = OperacionGuardada & {
+  tipo: TipoOperacion;
+  estado: "activa" | "anulada";
+  fecha: Date;
+  total: Pesos;
+  lineas: {
+    material: string;
+    gramos: Gramos;
+    precioPorKg: Pesos;
+    tarifa: Tarifa | null;
+    subtotal: Pesos;
+  }[];
+};
+
 export type ResumenOperacion = OperacionGuardada & {
   fecha: Date;
   total: Pesos;
@@ -33,6 +48,7 @@ export interface RepositorioOperaciones {
   guardarVenta(operacion: NuevaOperacion): Promise<Resultado<OperacionGuardada, StockInsuficiente>>;
   /** Stock por material (solo operaciones activas). Sin filtro, todos los que tienen movimientos. */
   consultarStock(materialIds?: string[]): Promise<Map<string, Gramos>>;
+  obtenerDetalle(id: string): Promise<DetalleOperacion | null>;
   listarRecientes(tipo: TipoOperacion, limite: number): Promise<ResumenOperacion[]>;
 }
 
@@ -69,6 +85,9 @@ export function crearCasosDeUsoOperaciones(
       repositorio.listarRecientes(tipo, RECIENTES_POR_DEFECTO),
 
     consultarStock: (materialIds?: string[]) => repositorio.consultarStock(materialIds),
+
+    obtenerDetalle: (id: string) =>
+      z.uuid().safeParse(id).success ? repositorio.obtenerDetalle(id) : Promise.resolve(null),
 
     /** Todos los materiales con su stock; los que no tienen movimientos quedan en cero. */
     async consultarInventario(): Promise<ExistenciaMaterial[]> {

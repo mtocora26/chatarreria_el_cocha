@@ -74,6 +74,41 @@ export function crearRepositorioOperaciones(obtenerDb: () => BaseDeDatos): Repos
 
     consultarStock: (materialIds) => consultarStock(obtenerDb(), materialIds),
 
+    async obtenerDetalle(id) {
+      const db = obtenerDb();
+      const [encabezado] = await db.select().from(transacciones).where(eq(transacciones.id, id));
+      if (!encabezado) return null;
+
+      const lineas = await db
+        .select({
+          material: materiales.nombre,
+          pesoKg: lineasTransaccion.pesoKg,
+          precioUnitario: lineasTransaccion.precioUnitario,
+          tarifa: lineasTransaccion.tarifa,
+          subtotal: lineasTransaccion.subtotal,
+        })
+        .from(lineasTransaccion)
+        .innerJoin(materiales, eq(materiales.id, lineasTransaccion.materialId))
+        .where(eq(lineasTransaccion.transaccionId, id))
+        .orderBy(asc(materiales.nombre), asc(lineasTransaccion.pesoKg));
+
+      return {
+        id: encabezado.id,
+        consecutivo: encabezado.consecutivo,
+        tipo: encabezado.tipo,
+        estado: encabezado.estado,
+        fecha: encabezado.fecha,
+        total: pesosDesdeNumeric(encabezado.total),
+        lineas: lineas.map((l) => ({
+          material: l.material,
+          gramos: gramosDesdeNumeric(l.pesoKg),
+          precioPorKg: pesosDesdeNumeric(l.precioUnitario),
+          tarifa: l.tarifa,
+          subtotal: pesosDesdeNumeric(l.subtotal),
+        })),
+      };
+    },
+
     async listarRecientes(tipo, limite) {
       const db = obtenerDb();
       const encabezados = await db

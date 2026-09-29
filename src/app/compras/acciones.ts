@@ -20,5 +20,5 @@ export async function registrarCompraAccion(
   if (!resultado.ok) return { errores: resultado.error };
 
   revalidatePath("/", "layout");
-  redirect(`/compras?registrada=${resultado.valor.consecutivo}`);
+  redirect(`/recibos/${resultado.valor.id}?nuevo=1`);
 }

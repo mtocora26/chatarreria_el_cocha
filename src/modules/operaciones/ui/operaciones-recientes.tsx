@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { formatearCOP } from "@/shared/dominio/dinero";
 import { formatearFechaHora } from "@/shared/dominio/fecha";
 import { claseTarjeta } from "@/shared/ui/estilos";
@@ -36,7 +37,15 @@ export function OperacionesRecientes({ titulo, operaciones }: OperacionesRecient
             <tbody className="divide-y divide-stone-200">
               {operaciones.map((operacion) => (
                 <tr key={operacion.id}>
-                  <td className="px-4 py-2 tabular-nums">{operacion.consecutivo}</td>
+                  <td className="px-4 py-2 tabular-nums">
+                    <Link
+                      href={`/recibos/${operacion.id}`}
+                      className="font-medium text-amber-700 hover:underline"
+                    >
+                      {operacion.consecutivo}
+                      <span className="sr-only"> (ver recibo)</span>
+                    </Link>
+                  </td>
                   <td className="px-4 py-2 whitespace-nowrap">
                     {formatearFechaHora(operacion.fecha)}
                   </td>

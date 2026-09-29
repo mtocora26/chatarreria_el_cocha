@@ -9,6 +9,10 @@ export const operaciones = crearCasosDeUsoOperaciones(
   materiales,
 );
 
-export type { ExistenciaMaterial, ResumenOperacion } from "./application/casos-de-uso";
+export type {
+  DetalleOperacion,
+  ExistenciaMaterial,
+  ResumenOperacion,
+} from "./application/casos-de-uso";
 export type { EntradaCompra, EntradaVenta, ErroresOperacion } from "./application/validacion";
 export type { TipoOperacion } from "./domain/operacion";
