@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { parsearPesos } from "@/shared/dominio/dinero";
 import { parsearKg } from "@/shared/dominio/peso";
 
 export const MAXIMO_LINEAS = 30;
@@ -15,6 +16,15 @@ const pesoKg = z.string().transform((texto, ctx) => {
   return gramos;
 });
 
+const precioPorKg = z.string().transform((texto, ctx) => {
+  const pesos = parsearPesos(texto);
+  if (pesos === null || pesos === 0) {
+    ctx.addIssue({ code: "custom", message: "Ingresa un precio por kilo mayor que cero." });
+    return z.NEVER;
+  }
+  return pesos;
+});
+
 const lineaBase = {
   materialId: z.uuid({ error: "Elige un material." }),
   pesoKg,
@@ -28,7 +38,18 @@ export const esquemaCompra = z.object({
     .max(MAXIMO_LINEAS, `Máximo ${MAXIMO_LINEAS} materiales por operación.`),
 });
 
+export const esquemaVenta = z.object({
+  lineas: z
+    .array(z.object({ ...lineaBase, precioPorKg }))
+    .min(1, "Agrega al menos un material.")
+    .max(MAXIMO_LINEAS, `Máximo ${MAXIMO_LINEAS} materiales por operación.`),
+});
+
 // Lo que llega del formulario, todavía sin validar.
+export type EntradaVenta = {
+  lineas: { materialId: string; pesoKg: string; precioPorKg: string }[];
+};
+
 export type EntradaCompra = {
   tarifa: string;
   lineas: { materialId: string; pesoKg: string }[];

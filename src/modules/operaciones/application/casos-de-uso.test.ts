@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Material } from "@/modules/materiales/domain/material";
-import type { NuevaOperacion } from "../domain/operacion";
+import { verificarStock, type NuevaOperacion } from "../domain/operacion";
 import { crearCasosDeUsoOperaciones, type RepositorioOperaciones } from "./casos-de-uso";
 
 const COBRE_ID = "7f0c1c8e-8a4e-4f8e-9b1a-1c2d3e4f5a6b";
@@ -25,13 +25,20 @@ const catalogo: Material[] = [
   },
 ];
 
-function preparar() {
+function preparar(stockDisponible = new Map<string, number>()) {
   const guardadas: NuevaOperacion[] = [];
   const repositorio: RepositorioOperaciones = {
     guardar: async (operacion) => {
       guardadas.push(operacion);
       return { id: "id", consecutivo: guardadas.length };
     },
+    guardarVenta: async (operacion) => {
+      const verificacion = verificarStock(operacion.lineas, stockDisponible);
+      if (!verificacion.ok) return verificacion;
+      guardadas.push(operacion);
+      return { ok: true, valor: { id: "id", consecutivo: guardadas.length } };
+    },
+    consultarStock: async () => new Map(),
     listarRecientes: async () => [],
   };
   const casos = crearCasosDeUsoOperaciones(repositorio, {
@@ -95,5 +102,42 @@ describe("registrarCompra", () => {
     const resultado = await casos.registrarCompra({ tarifa: "minorista", lineas: [] });
 
     expect(resultado).toEqual({ ok: false, error: { lineas: "Agrega al menos un material." } });
+  });
+});
+
+describe("registrarVenta", () => {
+  it("guarda con el precio indicado y el total calculado en servidor", async () => {
+    const { casos, guardadas } = preparar(new Map([[COBRE_ID, 5000]]));
+
+    const resultado = await casos.registrarVenta({
+      lineas: [{ materialId: COBRE_ID, pesoKg: "1.5", precioPorKg: "35000" }],
+    });
+
+    expect(resultado.ok).toBe(true);
+    expect(guardadas[0]).toMatchObject({ tipo: "venta", total: 52500 });
+  });
+
+  it("informa stock insuficiente en el peso de la línea", async () => {
+    const { casos, guardadas } = preparar(new Map([[COBRE_ID, 1000]]));
+
+    const resultado = await casos.registrarVenta({
+      lineas: [{ materialId: COBRE_ID, pesoKg: "1.001", precioPorKg: "35000" }],
+    });
+
+    expect(resultado).toEqual({
+      ok: false,
+      error: { "lineas.0.pesoKg": "Stock insuficiente: hay 1,000 kg disponibles." },
+    });
+    expect(guardadas).toHaveLength(0);
+  });
+
+  it("exige precio por kilo mayor que cero", async () => {
+    const { casos } = preparar(new Map([[COBRE_ID, 5000]]));
+
+    const resultado = await casos.registrarVenta({
+      lineas: [{ materialId: COBRE_ID, pesoKg: "1", precioPorKg: "0" }],
+    });
+
+    expect(!resultado.ok && Object.keys(resultado.error)).toEqual(["lineas.0.precioPorKg"]);
   });
 });

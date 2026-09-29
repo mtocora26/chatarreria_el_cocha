@@ -26,7 +26,10 @@ export type ErrorOperacion =
   | { tipo: "peso_invalido"; indice: number }
   | { tipo: "material_no_disponible"; indice: number };
 
+export type StockInsuficiente = { tipo: "stock_insuficiente"; indice: number; disponible: Gramos };
+
 export type LineaSolicitada = { material: Material | undefined; gramos: Gramos };
+export type LineaVentaSolicitada = LineaSolicitada & { precioPorKg: Pesos };
 
 function validarLineas(lineas: LineaSolicitada[]): Resultado<Material[], ErrorOperacion> {
   if (lineas.length === 0) return fallo({ tipo: "sin_lineas" });
@@ -63,4 +66,43 @@ export function crearCompra(
     };
   });
   return exito(armarOperacion("compra", lineas));
+}
+
+export function crearVenta(
+  solicitadas: LineaVentaSolicitada[],
+): Resultado<NuevaOperacion, ErrorOperacion> {
+  const validacion = validarLineas(solicitadas);
+  if (!validacion.ok) return validacion;
+
+  const lineas = validacion.valor.map((material, indice) => {
+    const { gramos, precioPorKg } = solicitadas[indice];
+    return {
+      materialId: material.id,
+      gramos,
+      precioPorKg,
+      tarifa: null,
+      subtotal: calcularSubtotal(gramos, precioPorKg),
+    };
+  });
+  return exito(armarOperacion("venta", lineas));
+}
+
+/**
+ * Una venta no puede dejar stock negativo. Las líneas del mismo material se
+ * acumulan; el error señala la línea en la que se supera lo disponible.
+ */
+export function verificarStock(
+  lineas: Pick<LineaOperacion, "materialId" | "gramos">[],
+  stock: ReadonlyMap<string, Gramos>,
+): Resultado<void, StockInsuficiente> {
+  const solicitado = new Map<string, Gramos>();
+  for (const [indice, { materialId, gramos }] of lineas.entries()) {
+    const acumulado = (solicitado.get(materialId) ?? 0) + gramos;
+    const disponible = stock.get(materialId) ?? 0;
+    if (acumulado > disponible) {
+      return fallo({ tipo: "stock_insuficiente", indice, disponible });
+    }
+    solicitado.set(materialId, acumulado);
+  }
+  return exito(undefined);
 }

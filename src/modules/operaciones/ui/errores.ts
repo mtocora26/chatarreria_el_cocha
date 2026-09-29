@@ -11,7 +11,7 @@ export function useErroresVisibles(estado: EstadoFormularioOperacion) {
   const errores = estado.errores ?? {};
 
   return {
-    hayErrores: Object.keys(errores).length > 0,
+    hayErrores: Object.keys(errores).some((ruta) => !rutasEditadas.has(ruta)),
     error: (ruta: string) => (rutasEditadas.has(ruta) ? undefined : errores[ruta]),
     marcarEditado: (ruta: string) =>
       setEditados({ estado, rutas: new Set(rutasEditadas).add(ruta) }),

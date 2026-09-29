@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Material } from "@/modules/materiales/domain/material";
-import { crearCompra } from "./operacion";
+import { crearCompra, crearVenta, verificarStock } from "./operacion";
 
 const cobre: Material = {
   id: "cobre",
@@ -80,5 +80,67 @@ describe("crearCompra", () => {
       ok: false,
       error: { tipo: "material_no_disponible", indice: 0 },
     });
+  });
+});
+
+describe("crearVenta", () => {
+  it("usa el precio indicado en cada línea y no asigna tarifa", () => {
+    const resultado = crearVenta([{ material: cobre, gramos: 1500, precioPorKg: 35000 }]);
+
+    expect(resultado).toEqual({
+      ok: true,
+      valor: {
+        tipo: "venta",
+        lineas: [
+          { materialId: "cobre", gramos: 1500, precioPorKg: 35000, tarifa: null, subtotal: 52500 },
+        ],
+        total: 52500,
+      },
+    });
+  });
+
+  it("aplica las mismas validaciones de líneas que la compra", () => {
+    expect(crearVenta([{ material: cobre, gramos: 0, precioPorKg: 1 }])).toEqual({
+      ok: false,
+      error: { tipo: "peso_invalido", indice: 0 },
+    });
+  });
+});
+
+describe("verificarStock", () => {
+  const stock = new Map([
+    ["cobre", 5000],
+    ["chatarra", 1000],
+  ]);
+
+  it("permite vender exactamente lo disponible", () => {
+    expect(verificarStock([{ materialId: "cobre", gramos: 5000 }], stock).ok).toBe(true);
+  });
+
+  it("rechaza superar lo disponible", () => {
+    expect(verificarStock([{ materialId: "chatarra", gramos: 1001 }], stock)).toEqual({
+      ok: false,
+      error: { tipo: "stock_insuficiente", indice: 0, disponible: 1000 },
+    });
+  });
+
+  it("acumula varias líneas del mismo material", () => {
+    const resultado = verificarStock(
+      [
+        { materialId: "cobre", gramos: 3000 },
+        { materialId: "chatarra", gramos: 500 },
+        { materialId: "cobre", gramos: 2001 },
+      ],
+      stock,
+    );
+
+    expect(resultado).toEqual({
+      ok: false,
+      error: { tipo: "stock_insuficiente", indice: 2, disponible: 5000 },
+    });
+  });
+
+  it("un material sin movimientos tiene stock cero", () => {
+    expect(verificarStock([{ materialId: "otro", gramos: 1 }], stock).ok).toBe(false);
   });
 });

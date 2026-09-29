@@ -10,5 +10,5 @@ export const operaciones = crearCasosDeUsoOperaciones(
 );
 
 export type { ResumenOperacion } from "./application/casos-de-uso";
-export type { EntradaCompra, ErroresOperacion } from "./application/validacion";
+export type { EntradaCompra, EntradaVenta, ErroresOperacion } from "./application/validacion";
 export type { TipoOperacion } from "./domain/operacion";
