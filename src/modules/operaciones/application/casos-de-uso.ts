@@ -37,8 +37,11 @@ export interface RepositorioOperaciones {
 }
 
 export interface CatalogoMateriales {
+  listarMateriales(): Promise<Material[]>;
   obtenerMateriales(ids: string[]): Promise<Material[]>;
 }
+
+export type ExistenciaMaterial = Pick<Material, "id" | "nombre" | "activo"> & { stock: Gramos };
 
 const RECIENTES_POR_DEFECTO = 10;
 
@@ -66,6 +69,20 @@ export function crearCasosDeUsoOperaciones(
       repositorio.listarRecientes(tipo, RECIENTES_POR_DEFECTO),
 
     consultarStock: (materialIds?: string[]) => repositorio.consultarStock(materialIds),
+
+    /** Todos los materiales con su stock; los que no tienen movimientos quedan en cero. */
+    async consultarInventario(): Promise<ExistenciaMaterial[]> {
+      const [materiales, stock] = await Promise.all([
+        catalogo.listarMateriales(),
+        repositorio.consultarStock(),
+      ]);
+      return materiales.map(({ id, nombre, activo }) => ({
+        id,
+        nombre,
+        activo,
+        stock: stock.get(id) ?? 0,
+      }));
+    },
 
     async registrarCompra(
       entrada: EntradaCompra,

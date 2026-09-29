@@ -38,10 +38,11 @@ function preparar(stockDisponible = new Map<string, number>()) {
       guardadas.push(operacion);
       return { ok: true, valor: { id: "id", consecutivo: guardadas.length } };
     },
-    consultarStock: async () => new Map(),
+    consultarStock: async () => stockDisponible,
     listarRecientes: async () => [],
   };
   const casos = crearCasosDeUsoOperaciones(repositorio, {
+    listarMateriales: async () => catalogo,
     obtenerMateriales: async (ids) => catalogo.filter((m) => ids.includes(m.id)),
   });
   return { casos, guardadas };
@@ -139,5 +140,18 @@ describe("registrarVenta", () => {
     });
 
     expect(!resultado.ok && Object.keys(resultado.error)).toEqual(["lineas.0.precioPorKg"]);
+  });
+});
+
+describe("consultarInventario", () => {
+  it("incluye todos los materiales y deja en cero los que no tienen movimientos", async () => {
+    const { casos } = preparar(new Map([[COBRE_ID, 2500]]));
+
+    const inventario = await casos.consultarInventario();
+
+    expect(inventario).toEqual([
+      { id: COBRE_ID, nombre: "Cobre", activo: true, stock: 2500 },
+      { id: INACTIVO_ID, nombre: "Bronce", activo: false, stock: 0 },
+    ]);
   });
 });

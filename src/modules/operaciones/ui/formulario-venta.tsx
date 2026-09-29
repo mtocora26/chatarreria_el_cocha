@@ -102,10 +102,10 @@ export function FormularioVenta({ accion, materiales }: FormularioVentaProps) {
                 <input
                   id={`peso-${linea.clave}`}
                   name="pesoKg"
-                  type="number"
+                  // Texto y no number: permite la coma decimal en cualquier idioma del navegador.
+                  type="text"
                   inputMode="decimal"
-                  min={0}
-                  step={0.001}
+                  autoComplete="off"
                   placeholder="0,000"
                   value={linea.pesoKg}
                   onChange={(e) => {

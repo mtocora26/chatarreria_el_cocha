@@ -1,13 +1,22 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
+import { operaciones } from "@/modules/operaciones";
+import { TablaInventario } from "@/modules/operaciones/ui/tabla-inventario";
 import { EncabezadoPagina } from "@/shared/ui/encabezado-pagina";
 
 export const metadata: Metadata = { title: "Inventario" };
 
-export default function PaginaInventario() {
+export default async function PaginaInventario() {
+  await connection();
+  const existencias = await operaciones.consultarInventario();
+
   return (
     <>
-      <EncabezadoPagina titulo="Inventario" descripcion="Kilos disponibles de cada material." />
-      <p className="text-stone-500">En construcción (I06).</p>
+      <EncabezadoPagina
+        titulo="Inventario"
+        descripcion="Kilos disponibles de cada material: compras menos ventas registradas."
+      />
+      <TablaInventario existencias={existencias} />
     </>
   );
 }
