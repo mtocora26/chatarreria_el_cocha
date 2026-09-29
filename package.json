@@ -16,7 +16,9 @@
     "db:studio": "drizzle-kit studio",
     "db:verificar": "tsx scripts/verificar-db.ts",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "db:local": "tsx scripts/db-local.ts",
+    "db:demo": "tsx scripts/datos-demo.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.3",
@@ -35,6 +37,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "drizzle-kit": "^0.31.11",
+    "embedded-postgres": "^18.4.0-beta.17",
     "eslint": "^9",
     "eslint-config-next": "16.3.7",
     "eslint-config-prettier": "^10.1.8",

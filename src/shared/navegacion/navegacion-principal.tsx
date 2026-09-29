@@ -19,7 +19,7 @@ export function NavegacionPrincipal() {
                 aria-current={estaActiva ? "page" : undefined}
                 className={`block rounded-md px-2 py-2 text-center text-sm font-medium transition-colors sm:px-3 ${
                   estaActiva
-                    ? "bg-amber-600 text-white"
+                    ? "bg-amber-700 text-white"
                     : "text-stone-700 hover:bg-stone-200 hover:text-stone-900"
                 }`}
               >
