@@ -8,11 +8,11 @@ Aplicación web para registrar compras y ventas de chatarra, controlar el invent
 
 ## Stack
 
-Next.js (App Router) · TypeScript · Tailwind CSS · PostgreSQL (Neon) · Drizzle ORM · ESLint · Prettier
+Next.js (App Router) · TypeScript · Tailwind CSS · PostgreSQL (Neon) · Drizzle ORM · Zod · Vitest · ESLint · Prettier
 
 ## Requisitos
 
-- Node.js 20.9 o superior (probado con Node 22)
+- Node.js 22 o superior
 - npm
 
 ## Desarrollo local
