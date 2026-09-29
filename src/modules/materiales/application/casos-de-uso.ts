@@ -6,6 +6,7 @@ import { esquemaMaterial, type CampoMaterial, type EntradaMaterial } from "./val
 export interface RepositorioMateriales {
   listar(filtro?: { soloActivos: boolean }): Promise<Material[]>;
   obtener(id: string): Promise<Material | null>;
+  obtenerVarios(ids: string[]): Promise<Material[]>;
   crear(datos: DatosMaterial): Promise<Resultado<Material, "nombre_duplicado">>;
   actualizar(
     id: string,
@@ -25,6 +26,8 @@ export function crearCasosDeUsoMateriales(repositorio: RepositorioMateriales) {
 
     obtenerMaterial: (id: string) =>
       z.uuid().safeParse(id).success ? repositorio.obtener(id) : Promise.resolve(null),
+
+    obtenerMateriales: (ids: string[]) => repositorio.obtenerVarios([...new Set(ids)]),
 
     async guardarMaterial(
       id: string | null,

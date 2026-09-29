@@ -1,0 +1,14 @@
+import "server-only";
+import { materiales } from "@/modules/materiales";
+import { obtenerDb } from "@/server/db";
+import { crearCasosDeUsoOperaciones } from "./application/casos-de-uso";
+import { crearRepositorioOperaciones } from "./infrastructure/repositorio-drizzle";
+
+export const operaciones = crearCasosDeUsoOperaciones(
+  crearRepositorioOperaciones(obtenerDb),
+  materiales,
+);
+
+export type { ResumenOperacion } from "./application/casos-de-uso";
+export type { EntradaCompra, ErroresOperacion } from "./application/validacion";
+export type { TipoOperacion } from "./domain/operacion";

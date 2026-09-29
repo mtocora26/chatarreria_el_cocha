@@ -12,6 +12,7 @@ function repositorioEnMemoria(): RepositorioMateriales {
   return {
     listar: async (filtro) => guardados.filter((m) => !filtro?.soloActivos || m.activo),
     obtener: async (id) => guardados.find((m) => m.id === id) ?? null,
+    obtenerVarios: async (ids) => guardados.filter((m) => ids.includes(m.id)),
     async crear(datos) {
       if (nombreOcupado(datos.nombre)) return fallo("nombre_duplicado");
       const material = { ...datos, id: crypto.randomUUID() };

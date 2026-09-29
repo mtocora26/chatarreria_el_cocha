@@ -1,4 +1,4 @@
-import { asc, eq } from "drizzle-orm";
+import { asc, eq, inArray } from "drizzle-orm";
 import type { BaseDeDatos } from "@/server/db/cliente";
 import { esViolacionUnica } from "@/server/db/errores";
 import { materiales } from "@/server/db/schema";
@@ -44,6 +44,12 @@ export function crearRepositorioMateriales(obtenerDb: () => BaseDeDatos): Reposi
     async obtener(id) {
       const [fila] = await obtenerDb().select().from(materiales).where(eq(materiales.id, id));
       return fila ? aMaterial(fila) : null;
+    },
+
+    async obtenerVarios(ids) {
+      if (ids.length === 0) return [];
+      const filas = await obtenerDb().select().from(materiales).where(inArray(materiales.id, ids));
+      return filas.map(aMaterial);
     },
 
     async crear(datos) {

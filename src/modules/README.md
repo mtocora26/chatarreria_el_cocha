@@ -11,7 +11,14 @@ src/modules/<modulo>/
 └── index.ts         # fachada: lo único que importa el resto de la app
 ```
 
-Módulos previstos: `materiales`, `terceros`, `compras`, `ventas`, `inventario`, `recibos`, `reportes`, `bascula`.
+Módulos actuales:
+
+- `materiales` — materiales y precios por kilo.
+- `operaciones` — compras y ventas. Se agrupan en un módulo porque comparten tablas, cálculo de líneas y totales, y guardado atómico; separarlas duplicaría esa lógica.
+
+Previstos: `terceros`, `inventario`, `recibos`, `reportes`, `bascula`.
+
+Un módulo usa a otro solo a través de su fachada (`index.ts`) o de tipos de su `domain/`.
 
 Otras carpetas de `src/`:
 
