@@ -17,6 +17,6 @@ Otras carpetas de `src/`:
 
 - `app/` — rutas y páginas de Next.js (App Router). Solo presentación.
 - `shared/` — componentes de UI y utilidades usadas por varios módulos.
-- `server/` — conexión a base de datos y autenticación (a partir de I02 / I10).
+- `server/` — conexión a base de datos (`server/db`) y, desde I10, autenticación.
 
 Ver `Arquitectura_Sistema_Chatarreria.md`, sección 6 y 9.
