@@ -3,6 +3,7 @@ import {
   calcularSubtotal,
   convertirAPesoGramos,
   formatearKg,
+  formatearKgResumido,
   gramosANumeric,
   gramosDesdeNumeric,
   parsearKg,
@@ -58,5 +59,18 @@ describe("formatearKg", () => {
   it("muestra siempre tres decimales", () => {
     expect(formatearKg(12500)).toBe("12,500 kg");
     expect(formatearKg(1234567)).toBe("1.234,567 kg");
+  });
+});
+
+describe("formatearKgResumido", () => {
+  it.each([
+    [0, "0 kg"],
+    [40, "< 0,1 kg"],
+    [50, "0,1 kg"],
+    [1000, "1 kg"],
+    [12549, "12,5 kg"],
+    [1250000, "1.250 kg"],
+  ])("%i g → %j", (gramos, texto) => {
+    expect(formatearKgResumido(gramos)).toBe(texto);
   });
 });

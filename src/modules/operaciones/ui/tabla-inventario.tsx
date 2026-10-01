@@ -1,4 +1,4 @@
-import { formatearKg } from "@/shared/dominio/peso";
+import { formatearKgResumido } from "@/shared/dominio/peso";
 import { claseTarjeta } from "@/shared/ui/estilos";
 import type { ExistenciaMaterial } from "../application/casos-de-uso";
 
@@ -35,7 +35,7 @@ export function TablaInventario({ existencias }: { existencias: ExistenciaMateri
               <td
                 className={`px-4 py-3 text-right tabular-nums ${existencia.stock === 0 ? "text-stone-400" : "font-semibold"}`}
               >
-                {formatearKg(existencia.stock)}
+                {formatearKgResumido(existencia.stock)}
               </td>
             </tr>
           ))}

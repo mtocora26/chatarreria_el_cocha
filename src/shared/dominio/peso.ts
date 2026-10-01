@@ -14,6 +14,9 @@ const formatoKg = new Intl.NumberFormat("es-CO", {
   maximumFractionDigits: 3,
 });
 
+const formatoKgResumido = new Intl.NumberFormat("es-CO", { maximumFractionDigits: 1 });
+const MINIMO_RESUMIDO = 50; // por debajo de 50 g redondearía a "0 kg" aunque haya stock
+
 /** Acepta "12", "12.5" o "12,5" (hasta 3 decimales). */
 export function parsearKg(texto: string): Gramos | null {
   const coincidencia = /^(\d+)(?:[.,](\d{1,3}))?$/.exec(texto.trim());
@@ -58,6 +61,12 @@ export function gramosANumeric(gramos: Gramos): string {
 
 export function formatearKg(gramos: Gramos): string {
   return `${formatoKg.format(gramos / GRAMOS_POR_KG)} kg`;
+}
+
+/** Para listados: un decimal como máximo. Recibos y validaciones usan `formatearKg`. */
+export function formatearKgResumido(gramos: Gramos): string {
+  if (gramos > 0 && gramos < MINIMO_RESUMIDO) return "< 0,1 kg";
+  return `${formatoKgResumido.format(gramos / GRAMOS_POR_KG)} kg`;
 }
 
 /** Subtotal redondeado al peso más cercano (0,5 sube). */
