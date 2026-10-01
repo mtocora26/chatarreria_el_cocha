@@ -13,9 +13,11 @@ function aMaterial(fila: FilaMaterial): Material {
   return {
     id: fila.id,
     nombre: fila.nombre,
-    precioCompraMinorista: pesosDesdeNumeric(fila.precioCompraMinorista),
-    precioCompraMayorista: pesosDesdeNumeric(fila.precioCompraMayorista),
-    precioVenta: pesosDesdeNumeric(fila.precioVenta),
+    precioCompraMinorista:
+      fila.precioCompraMinorista === null ? null : pesosDesdeNumeric(fila.precioCompraMinorista),
+    precioCompraMayorista:
+      fila.precioCompraMayorista === null ? null : pesosDesdeNumeric(fila.precioCompraMayorista),
+    precioVenta: fila.precioVenta === null ? null : pesosDesdeNumeric(fila.precioVenta),
     activo: fila.activo,
   };
 }
@@ -23,9 +25,11 @@ function aMaterial(fila: FilaMaterial): Material {
 function aFila(datos: DatosMaterial) {
   return {
     nombre: datos.nombre,
-    precioCompraMinorista: pesosANumeric(datos.precioCompraMinorista),
-    precioCompraMayorista: pesosANumeric(datos.precioCompraMayorista),
-    precioVenta: pesosANumeric(datos.precioVenta),
+    precioCompraMinorista:
+      datos.precioCompraMinorista === null ? null : pesosANumeric(datos.precioCompraMinorista),
+    precioCompraMayorista:
+      datos.precioCompraMayorista === null ? null : pesosANumeric(datos.precioCompraMayorista),
+    precioVenta: datos.precioVenta === null ? null : pesosANumeric(datos.precioVenta),
     activo: datos.activo,
   };
 }

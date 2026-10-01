@@ -30,6 +30,9 @@ export type DetalleOperacion = OperacionGuardada & {
   lineas: {
     material: string;
     gramos: Gramos;
+    cantidadPeso: number;
+    unidadPeso: "kg" | "lb" | "otra";
+    equivalenciaKg: number;
     precioPorKg: Pesos;
     tarifa: Tarifa | null;
     subtotal: Pesos;
@@ -71,6 +74,8 @@ function erroresDeDominio(error: ErrorOperacion | StockInsuficiente): ErroresOpe
       return { lineas: "Agrega al menos un material." };
     case "peso_invalido":
       return { [`lineas.${error.indice}.pesoKg`]: "Ingresa un peso mayor que cero." };
+    case "precio_invalido":
+      return { [`lineas.${error.indice}.precioPorKg`]: "Define un precio por kg mayor que cero." };
     case "material_no_disponible":
       return { [`lineas.${error.indice}.materialId`]: "Este material ya no está disponible." };
   }
@@ -110,12 +115,18 @@ export function crearCasosDeUsoOperaciones(
       if (!validacion.success) return fallo(erroresPorRuta(validacion.error));
 
       const { tarifa, lineas } = validacion.data;
-      // El precio se toma del servidor; nunca del navegador.
       const materiales = await catalogo.obtenerMateriales(lineas.map((l) => l.materialId));
       const porId = new Map(materiales.map((m) => [m.id, m]));
 
       const compra = crearCompra(
-        lineas.map((l) => ({ material: porId.get(l.materialId), gramos: l.pesoKg })),
+        lineas.map((l) => ({
+          material: porId.get(l.materialId),
+          gramos: l.gramos,
+          precioPorKg: l.precioPorKg,
+          cantidadPeso: l.cantidadPeso,
+          unidadPeso: l.unidadPeso,
+          equivalenciaKg: l.equivalenciaKg,
+        })),
         tarifa,
       );
       if (!compra.ok) return fallo(erroresDeDominio(compra.error));
@@ -136,8 +147,11 @@ export function crearCasosDeUsoOperaciones(
       const venta = crearVenta(
         lineas.map((l) => ({
           material: porId.get(l.materialId),
-          gramos: l.pesoKg,
+          gramos: l.gramos,
           precioPorKg: l.precioPorKg,
+          cantidadPeso: l.cantidadPeso,
+          unidadPeso: l.unidadPeso,
+          equivalenciaKg: l.equivalenciaKg,
         })),
       );
       if (!venta.ok) return fallo(erroresDeDominio(venta.error));

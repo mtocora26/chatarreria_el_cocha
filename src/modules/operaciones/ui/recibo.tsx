@@ -45,7 +45,7 @@ export function Recibo({ operacion }: { operacion: DetalleOperacion }) {
               Material
             </th>
             <th scope="col" className="px-2 py-2 text-right font-semibold">
-              Kilos
+              Cantidad
             </th>
             <th scope="col" className="px-2 py-2 text-right font-semibold">
               Precio/kg
@@ -60,7 +60,9 @@ export function Recibo({ operacion }: { operacion: DetalleOperacion }) {
             <tr key={indice} className="border-b border-stone-200">
               <td className="py-2 pr-2">{linea.material}</td>
               <td className="px-2 py-2 text-right whitespace-nowrap tabular-nums">
-                {formatearKg(linea.gramos)}
+                {linea.cantidadPeso.toLocaleString("es-CO", { maximumFractionDigits: 3 })}{" "}
+                {linea.unidadPeso}
+                {linea.unidadPeso === "otra" && ` (${formatearKg(linea.gramos)})`}
               </td>
               <td className="px-2 py-2 text-right whitespace-nowrap tabular-nums">
                 {formatearCOP(linea.precioPorKg)}

@@ -12,11 +12,17 @@ export async function registrarCompraAccion(
 ): Promise<EstadoFormularioOperacion> {
   await exigirSesion();
   const pesos = formData.getAll("pesoKg").map(String);
+  const unidades = formData.getAll("unidadPeso").map(String);
+  const equivalencias = formData.getAll("equivalenciaKg").map(String);
+  const precios = formData.getAll("precioPorKg").map(String);
   const resultado = await operaciones.registrarCompra({
     tarifa: String(formData.get("tarifa") ?? ""),
     lineas: formData.getAll("materialId").map((materialId, indice) => ({
       materialId: String(materialId),
       pesoKg: pesos[indice] ?? "",
+      unidadPeso: unidades[indice] ?? "kg",
+      equivalenciaKg: equivalencias[indice] ?? "1",
+      precioPorKg: precios[indice] ?? "",
     })),
   });
   if (!resultado.ok) return { errores: resultado.error };

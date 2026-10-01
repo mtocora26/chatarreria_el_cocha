@@ -1,5 +1,4 @@
-import type { Material, Tarifa } from "@/modules/materiales/domain/material";
-import { precioDeCompra } from "@/modules/materiales/domain/material";
+import { precioDeCompra, type Material, type Tarifa } from "@/modules/materiales/domain/material";
 import type { Pesos } from "@/shared/dominio/dinero";
 import { calcularSubtotal, type Gramos } from "@/shared/dominio/peso";
 import { exito, fallo, type Resultado } from "@/shared/dominio/resultado";
@@ -11,6 +10,9 @@ export type LineaOperacion = {
   gramos: Gramos;
   // Copia del precio vigente: los recibos no cambian si luego se edita el material.
   precioPorKg: Pesos;
+  cantidadPeso: number;
+  unidadPeso: "kg" | "lb" | "otra";
+  equivalenciaKg: number;
   tarifa: Tarifa | null;
   subtotal: Pesos;
 };
@@ -24,12 +26,20 @@ export type NuevaOperacion = {
 export type ErrorOperacion =
   | { tipo: "sin_lineas" }
   | { tipo: "peso_invalido"; indice: number }
+  | { tipo: "precio_invalido"; indice: number }
   | { tipo: "material_no_disponible"; indice: number };
 
 export type StockInsuficiente = { tipo: "stock_insuficiente"; indice: number; disponible: Gramos };
 
-export type LineaSolicitada = { material: Material | undefined; gramos: Gramos };
-export type LineaVentaSolicitada = LineaSolicitada & { precioPorKg: Pesos };
+export type LineaSolicitada = {
+  material: Material | undefined;
+  gramos: Gramos;
+  precioPorKg?: Pesos | null;
+  cantidadPeso?: number;
+  unidadPeso?: "kg" | "lb" | "otra";
+  equivalenciaKg?: number;
+};
+export type LineaVentaSolicitada = LineaSolicitada;
 
 function validarLineas(lineas: LineaSolicitada[]): Resultado<Material[], ErrorOperacion> {
   if (lineas.length === 0) return fallo({ tipo: "sin_lineas" });
@@ -54,17 +64,22 @@ export function crearCompra(
   const validacion = validarLineas(solicitadas);
   if (!validacion.ok) return validacion;
 
-  const lineas = validacion.valor.map((material, indice) => {
-    const { gramos } = solicitadas[indice];
-    const precioPorKg = precioDeCompra(material, tarifa);
-    return {
+  const lineas: LineaOperacion[] = [];
+  for (const [indice, material] of validacion.valor.entries()) {
+    const { gramos, cantidadPeso, unidadPeso, equivalenciaKg } = solicitadas[indice];
+    const precioPorKg = solicitadas[indice].precioPorKg ?? precioDeCompra(material, tarifa);
+    if (precioPorKg === null || precioPorKg <= 0) return fallo({ tipo: "precio_invalido", indice });
+    lineas.push({
       materialId: material.id,
       gramos,
       precioPorKg,
       tarifa,
       subtotal: calcularSubtotal(gramos, precioPorKg),
-    };
-  });
+      cantidadPeso: cantidadPeso ?? gramos / 1000,
+      unidadPeso: unidadPeso ?? "kg",
+      equivalenciaKg: equivalenciaKg ?? 1,
+    });
+  }
   return exito(armarOperacion("compra", lineas));
 }
 
@@ -74,16 +89,24 @@ export function crearVenta(
   const validacion = validarLineas(solicitadas);
   if (!validacion.ok) return validacion;
 
-  const lineas = validacion.valor.map((material, indice) => {
-    const { gramos, precioPorKg } = solicitadas[indice];
-    return {
+  const lineas: LineaOperacion[] = [];
+  for (const [indice, material] of validacion.valor.entries()) {
+    const { gramos, cantidadPeso, unidadPeso, equivalenciaKg } = solicitadas[indice];
+    const precioPorKg = solicitadas[indice].precioPorKg;
+    if (precioPorKg === null || precioPorKg === undefined || precioPorKg <= 0) {
+      return fallo({ tipo: "precio_invalido", indice });
+    }
+    lineas.push({
       materialId: material.id,
       gramos,
       precioPorKg,
       tarifa: null,
       subtotal: calcularSubtotal(gramos, precioPorKg),
-    };
-  });
+      cantidadPeso: cantidadPeso ?? gramos / 1000,
+      unidadPeso: unidadPeso ?? "kg",
+      equivalenciaKg: equivalenciaKg ?? 1,
+    });
+  }
   return exito(armarOperacion("venta", lineas));
 }
 

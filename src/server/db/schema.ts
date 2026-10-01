@@ -14,7 +14,9 @@ import {
 } from "drizzle-orm/pg-core";
 
 export const authUser = pgTable("user", {
-  id: text().primaryKey().default(sql`gen_random_uuid()::text`),
+  id: text()
+    .primaryKey()
+    .default(sql`gen_random_uuid()::text`),
   name: text().notNull(),
   email: text().notNull().unique(),
   emailVerified: boolean().notNull().default(false),
@@ -30,7 +32,9 @@ export const authUser = pgTable("user", {
 export const authSession = pgTable(
   "session",
   {
-    id: text().primaryKey().default(sql`gen_random_uuid()::text`),
+    id: text()
+      .primaryKey()
+      .default(sql`gen_random_uuid()::text`),
     expiresAt: timestamp({ withTimezone: true }).notNull(),
     token: text().notNull().unique(),
     createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
@@ -48,7 +52,9 @@ export const authSession = pgTable(
 export const authAccount = pgTable(
   "account",
   {
-    id: text().primaryKey().default(sql`gen_random_uuid()::text`),
+    id: text()
+      .primaryKey()
+      .default(sql`gen_random_uuid()::text`),
     accountId: text().notNull(),
     providerId: text().notNull(),
     userId: text()
@@ -70,7 +76,9 @@ export const authAccount = pgTable(
 export const authVerification = pgTable(
   "verification",
   {
-    id: text().primaryKey().default(sql`gen_random_uuid()::text`),
+    id: text()
+      .primaryKey()
+      .default(sql`gen_random_uuid()::text`),
     identifier: text().notNull(),
     value: text().notNull(),
     expiresAt: timestamp({ withTimezone: true }).notNull(),
@@ -83,6 +91,7 @@ export const authVerification = pgTable(
 // Dinero en COP y peso en kg con gramos. Nunca float: evita errores de redondeo.
 const dinero = () => numeric({ precision: 14, scale: 2 });
 const pesoKg = () => numeric({ precision: 10, scale: 3 });
+const equivalenciaKg = () => numeric({ precision: 10, scale: 6 });
 
 const marcasDeTiempo = {
   creadoEn: timestamp({ withTimezone: true }).notNull().defaultNow(),
@@ -103,9 +112,9 @@ export const materiales = pgTable(
   {
     id: uuid().primaryKey().defaultRandom(),
     nombre: text().notNull(),
-    precioCompraMinorista: dinero().notNull(),
-    precioCompraMayorista: dinero().notNull(),
-    precioVenta: dinero().notNull(),
+    precioCompraMinorista: dinero(),
+    precioCompraMayorista: dinero(),
+    precioVenta: dinero(),
     activo: boolean().notNull().default(true),
     ...marcasDeTiempo,
   },
@@ -159,7 +168,11 @@ export const lineasTransaccion = pgTable(
     materialId: uuid()
       .notNull()
       .references(() => materiales.id, { onDelete: "restrict" }),
+    // Peso normalizado a kg para inventario; cantidad/unidad conservan la captura original.
     pesoKg: pesoKg().notNull(),
+    cantidadPeso: pesoKg().notNull(),
+    unidadPeso: text().notNull().default("kg"),
+    equivalenciaKg: equivalenciaKg().notNull().default("1"),
     // Copia del precio al momento de la operación: editar el material no altera recibos previos.
     precioUnitario: dinero().notNull(),
     // Solo aplica a compras; en ventas queda vacío.
@@ -175,5 +188,8 @@ export const lineasTransaccion = pgTable(
       "lineas_transaccion_valores_no_negativos",
       sql`${t.precioUnitario} >= 0 AND ${t.subtotal} >= 0`,
     ),
+    check("lineas_transaccion_unidad_peso_valida", sql`${t.unidadPeso} IN ('kg', 'lb', 'otra')`),
+    check("lineas_transaccion_cantidad_positiva", sql`${t.cantidadPeso} > 0`),
+    check("lineas_transaccion_equivalencia_positiva", sql`${t.equivalenciaKg} > 0`),
   ],
 );

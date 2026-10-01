@@ -77,7 +77,6 @@ describe("registrarCompra", () => {
     expect(resultado.ok).toBe(false);
     expect(!resultado.ok && Object.keys(resultado.error).sort()).toEqual([
       "lineas.1.materialId",
-      "lineas.1.pesoKg",
       "tarifa",
     ]);
     expect(guardadas).toHaveLength(0);

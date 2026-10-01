@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   calcularSubtotal,
+  convertirAPesoGramos,
   formatearKg,
   gramosANumeric,
   gramosDesdeNumeric,
@@ -29,6 +30,16 @@ describe("conversión numeric", () => {
     expect(gramosDesdeNumeric("1.005")).toBe(1005);
     expect(gramosDesdeNumeric("-2.250")).toBe(-2250);
     expect(gramosDesdeNumeric("0")).toBe(0);
+  });
+});
+
+describe("unidades de captura", () => {
+  it("convierte libras a gramos normalizados", () => {
+    expect(convertirAPesoGramos("2", "lb")).toBe(907);
+  });
+
+  it("convierte una medida personalizada con equivalencia en kg", () => {
+    expect(convertirAPesoGramos("3", "otra", "12,5")).toBe(37500);
   });
 });
 

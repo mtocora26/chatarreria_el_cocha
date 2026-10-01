@@ -2,7 +2,12 @@
 
 import { useActionState } from "react";
 import { formatearCOP, parsearPesos, type Pesos } from "@/shared/dominio/dinero";
-import { calcularSubtotal, formatearKg, parsearKg, type Gramos } from "@/shared/dominio/peso";
+import {
+  calcularSubtotal,
+  convertirAPesoGramos,
+  formatearKg,
+  type Gramos,
+} from "@/shared/dominio/peso";
 import { Aviso } from "@/shared/ui/aviso";
 import { claseBotonPrimario, claseBotonSecundario, claseInput } from "@/shared/ui/estilos";
 import { useErroresVisibles } from "./errores";
@@ -12,7 +17,7 @@ import { useLineas } from "./lineas";
 export type MaterialParaVenta = {
   id: string;
   nombre: string;
-  precioVenta: Pesos;
+  precioVenta: Pesos | null;
   stock: Gramos;
 };
 
@@ -29,7 +34,10 @@ export function FormularioVenta({ accion, materiales }: FormularioVentaProps) {
   const materialDe = (id: string) => materiales.find((m) => m.id === id);
   // Vista previa; el servidor recalcula y vuelve a validar el stock al guardar.
   const subtotales = lineas.map((l) =>
-    calcularSubtotal(parsearKg(l.pesoKg) ?? 0, parsearPesos(l.precioPorKg) ?? 0),
+    calcularSubtotal(
+      convertirAPesoGramos(l.pesoKg, l.unidadPeso, l.equivalenciaKg) ?? 0,
+      parsearPesos(l.precioPorKg) ?? 0,
+    ),
   );
   const total = subtotales.reduce((suma, s) => suma + s, 0);
 
@@ -45,7 +53,7 @@ export function FormularioVenta({ accion, materiales }: FormularioVentaProps) {
           const rutaPeso = `lineas.${indice}.pesoKg`;
           const rutaPrecio = `lineas.${indice}.precioPorKg`;
           const material = materialDe(linea.materialId);
-          const gramos = parsearKg(linea.pesoKg);
+          const gramos = convertirAPesoGramos(linea.pesoKg, linea.unidadPeso, linea.equivalenciaKg);
           const superaStock = material !== undefined && gramos !== null && gramos > material.stock;
           const errorPeso =
             error(rutaPeso) ??
@@ -68,7 +76,10 @@ export function FormularioVenta({ accion, materiales }: FormularioVentaProps) {
                     const elegido = materialDe(e.target.value);
                     actualizar(linea.clave, {
                       materialId: e.target.value,
-                      precioPorKg: elegido ? String(elegido.precioVenta) : "",
+                      precioPorKg:
+                        elegido?.precioVenta === null || !elegido
+                          ? ""
+                          : String(elegido.precioVenta),
                     });
                     marcarEditado(rutaMaterial);
                   }}
@@ -97,7 +108,7 @@ export function FormularioVenta({ accion, materiales }: FormularioVentaProps) {
                   htmlFor={`peso-${linea.clave}`}
                   className="mb-1 block text-xs text-stone-600"
                 >
-                  Peso (kg)
+                  Cantidad
                 </label>
                 <input
                   id={`peso-${linea.clave}`}
@@ -115,6 +126,31 @@ export function FormularioVenta({ accion, materiales }: FormularioVentaProps) {
                   aria-invalid={Boolean(errorPeso)}
                   className={claseInput}
                 />
+                <select
+                  name="unidadPeso"
+                  value={linea.unidadPeso}
+                  onChange={(e) =>
+                    actualizar(linea.clave, { unidadPeso: e.target.value as "kg" | "lb" | "otra" })
+                  }
+                  className={`${claseInput} mt-1`}
+                  aria-label={`Unidad de peso de la línea ${indice + 1}`}
+                >
+                  <option value="kg">kg</option>
+                  <option value="lb">lb</option>
+                  <option value="otra">Otra medida</option>
+                </select>
+                {linea.unidadPeso === "otra" && (
+                  <input
+                    name="equivalenciaKg"
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="kg por unidad"
+                    value={linea.equivalenciaKg}
+                    onChange={(e) => actualizar(linea.clave, { equivalenciaKg: e.target.value })}
+                    className={`${claseInput} mt-1`}
+                    aria-label={`Equivalencia en kg de la línea ${indice + 1}`}
+                  />
+                )}
                 {errorPeso && <p className="mt-1 text-sm text-red-700">{errorPeso}</p>}
               </div>
 
@@ -132,6 +168,7 @@ export function FormularioVenta({ accion, materiales }: FormularioVentaProps) {
                   inputMode="numeric"
                   min={0}
                   step={1}
+                  placeholder="Definir"
                   value={linea.precioPorKg}
                   onChange={(e) => {
                     actualizar(linea.clave, { precioPorKg: e.target.value });

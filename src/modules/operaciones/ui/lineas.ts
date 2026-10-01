@@ -4,7 +4,8 @@ export type LineaFormulario = {
   clave: number;
   materialId: string;
   pesoKg: string;
-  // Solo en ventas: el precio se negocia y se puede ajustar por línea.
+  unidadPeso: "kg" | "lb" | "otra";
+  equivalenciaKg: string;
   precioPorKg: string;
 };
 
@@ -12,6 +13,8 @@ const lineaVacia = (clave: number): LineaFormulario => ({
   clave,
   materialId: "",
   pesoKg: "",
+  unidadPeso: "kg",
+  equivalenciaKg: "1",
   precioPorKg: "",
 });
 

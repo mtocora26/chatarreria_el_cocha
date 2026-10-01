@@ -45,13 +45,17 @@ export function TablaMateriales({ materiales }: { materiales: Material[] }) {
                 {material.nombre}
               </th>
               <td className="px-4 py-3 text-right tabular-nums">
-                {formatearCOP(material.precioCompraMinorista)}
+                {material.precioCompraMinorista === null
+                  ? "Sin definir"
+                  : formatearCOP(material.precioCompraMinorista)}
               </td>
               <td className="px-4 py-3 text-right tabular-nums">
-                {formatearCOP(material.precioCompraMayorista)}
+                {material.precioCompraMayorista === null
+                  ? "Sin definir"
+                  : formatearCOP(material.precioCompraMayorista)}
               </td>
               <td className="px-4 py-3 text-right tabular-nums">
-                {formatearCOP(material.precioVenta)}
+                {material.precioVenta === null ? "Sin definir" : formatearCOP(material.precioVenta)}
               </td>
               <td className="px-4 py-3">{material.activo ? "Activo" : "Inactivo"}</td>
               <td className="px-4 py-3 text-right">

@@ -30,6 +30,9 @@ describe("crearCompra", () => {
           {
             materialId: "cobre",
             gramos: 2500,
+            cantidadPeso: 2.5,
+            unidadPeso: "kg",
+            equivalenciaKg: 1,
             precioPorKg: 30000,
             tarifa: "minorista",
             subtotal: 75000,
@@ -37,6 +40,9 @@ describe("crearCompra", () => {
           {
             materialId: "chatarra",
             gramos: 12345,
+            cantidadPeso: 12.345,
+            unidadPeso: "kg",
+            equivalenciaKg: 1,
             precioPorKg: 900,
             tarifa: "minorista",
             subtotal: 11111,
@@ -92,7 +98,16 @@ describe("crearVenta", () => {
       valor: {
         tipo: "venta",
         lineas: [
-          { materialId: "cobre", gramos: 1500, precioPorKg: 35000, tarifa: null, subtotal: 52500 },
+          {
+            materialId: "cobre",
+            gramos: 1500,
+            cantidadPeso: 1.5,
+            unidadPeso: "kg",
+            equivalenciaKg: 1,
+            precioPorKg: 35000,
+            tarifa: null,
+            subtotal: 52500,
+          },
         ],
         total: 52500,
       },

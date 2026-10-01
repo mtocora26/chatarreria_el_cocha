@@ -3,14 +3,21 @@ import { parsearPesos } from "@/shared/dominio/dinero";
 
 const LARGO_MAXIMO_NOMBRE = 80;
 
-const precioPorKg = z.string().transform((texto, ctx) => {
-  const pesos = parsearPesos(texto);
-  if (pesos === null) {
-    ctx.addIssue({ code: "custom", message: "Ingresa un valor en pesos, entero y sin negativos." });
-    return z.NEVER;
-  }
-  return pesos;
-});
+const precioPorKg = z
+  .string()
+  .trim()
+  .transform((texto, ctx) => {
+    if (texto === "") return null;
+    const pesos = parsearPesos(texto);
+    if (pesos === null) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Ingresa un valor en pesos, entero y sin negativos.",
+      });
+      return z.NEVER;
+    }
+    return pesos;
+  });
 
 export const esquemaMaterial = z.object({
   nombre: z

@@ -59,8 +59,8 @@ export function FormularioMaterial({ accion, valoresIniciales }: FormularioMater
               inputMode="numeric"
               min={0}
               step={1}
-              required
-              defaultValue={valores?.[campo]}
+              placeholder="Opcional"
+              defaultValue={valores?.[campo] ?? ""}
               className={claseInput}
               {...atributosError(campo)}
             />
