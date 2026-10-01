@@ -12,6 +12,10 @@ export interface RepositorioMateriales {
     id: string,
     datos: DatosMaterial,
   ): Promise<Resultado<Material, "nombre_duplicado" | "no_encontrado">>;
+  tieneMovimientos(id: string): Promise<boolean>;
+  cambiarActivo(id: string, activo: boolean): Promise<Resultado<Material, "no_encontrado">>;
+  /** Solo borra materiales sin compras ni ventas; los demás se desactivan. */
+  eliminar(id: string): Promise<Resultado<void, "no_encontrado" | "tiene_movimientos">>;
 }
 
 export type ErrorGuardarMaterial =
@@ -19,13 +23,25 @@ export type ErrorGuardarMaterial =
   | { tipo: "nombre_duplicado" }
   | { tipo: "no_encontrado" };
 
+const esId = (id: string) => z.uuid().safeParse(id).success;
+
 export function crearCasosDeUsoMateriales(repositorio: RepositorioMateriales) {
   return {
     listarMateriales: () => repositorio.listar(),
     listarMaterialesActivos: () => repositorio.listar({ soloActivos: true }),
 
-    obtenerMaterial: (id: string) =>
-      z.uuid().safeParse(id).success ? repositorio.obtener(id) : Promise.resolve(null),
+    obtenerMaterial: (id: string) => (esId(id) ? repositorio.obtener(id) : Promise.resolve(null)),
+
+    tieneMovimientos: (id: string) =>
+      esId(id) ? repositorio.tieneMovimientos(id) : Promise.resolve(false),
+
+    cambiarActivo: (id: string, activo: boolean) =>
+      esId(id)
+        ? repositorio.cambiarActivo(id, activo)
+        : Promise.resolve(fallo("no_encontrado" as const)),
+
+    eliminarMaterial: (id: string) =>
+      esId(id) ? repositorio.eliminar(id) : Promise.resolve(fallo("no_encontrado" as const)),
 
     obtenerMateriales: (ids: string[]) => repositorio.obtenerVarios([...new Set(ids)]),
 
@@ -44,7 +60,7 @@ export function crearCasosDeUsoMateriales(repositorio: RepositorioMateriales) {
         });
       }
 
-      if (id !== null && !z.uuid().safeParse(id).success) return fallo({ tipo: "no_encontrado" });
+      if (id !== null && !esId(id)) return fallo({ tipo: "no_encontrado" });
 
       const resultado =
         id === null

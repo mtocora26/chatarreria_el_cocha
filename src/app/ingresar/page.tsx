@@ -10,7 +10,7 @@ export default async function PaginaIngreso({ searchParams }: PageProps<"/ingres
   return (
     <section className="mx-auto grid min-h-[70svh] w-full max-w-md content-center gap-8 py-10">
       <header className="grid gap-2">
-        <p className="text-sm font-semibold text-amber-800 uppercase">El Cocha</p>
+        <p className="text-oro-600 text-sm font-semibold uppercase">El Cocha</p>
         <h1 className="text-3xl font-bold text-stone-950">Ingresar al sistema</h1>
         <p className="text-stone-600">
           Accede para registrar y consultar la operación del negocio.

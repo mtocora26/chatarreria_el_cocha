@@ -9,6 +9,8 @@ export type LineaFormulario = {
   precioPorKg: string;
 };
 
+export type DatosLinea = Omit<LineaFormulario, "clave">;
+
 const lineaVacia = (clave: number): LineaFormulario => ({
   clave,
   materialId: "",
@@ -19,8 +21,10 @@ const lineaVacia = (clave: number): LineaFormulario => ({
 });
 
 /** Estado de las filas del formulario; `clave` identifica cada fila para React. */
-export function useLineas() {
-  const [lineas, setLineas] = useState<LineaFormulario[]>([lineaVacia(0)]);
+export function useLineas(iniciales: DatosLinea[] = []) {
+  const [lineas, setLineas] = useState<LineaFormulario[]>(() =>
+    iniciales.length > 0 ? iniciales.map((linea, clave) => ({ ...linea, clave })) : [lineaVacia(0)],
+  );
 
   return {
     lineas,
@@ -30,7 +34,7 @@ export function useLineas() {
         lineaVacia(Math.max(...actuales.map((l) => l.clave)) + 1),
       ]),
     quitar: (clave: number) => setLineas((actuales) => actuales.filter((l) => l.clave !== clave)),
-    actualizar: (clave: number, cambios: Partial<Omit<LineaFormulario, "clave">>) =>
+    actualizar: (clave: number, cambios: Partial<DatosLinea>) =>
       setLineas((actuales) => actuales.map((l) => (l.clave === clave ? { ...l, ...cambios } : l))),
   };
 }

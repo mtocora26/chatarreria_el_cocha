@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
+import Image from "next/image";
 import Link from "next/link";
-import { NavegacionPrincipal } from "@/shared/navegacion/navegacion-principal";
+import { NavegacionInferior, NavegacionPrincipal } from "@/shared/navegacion/navegacion-principal";
 import { cerrarSesionAccion } from "./ingresar/acciones";
 import { obtenerSesion } from "@/server/auth/sesion";
 import "./globals.css";
@@ -35,24 +36,31 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const sesion = await obtenerSesion();
 
   return (
-    <html
-      lang="es"
-      className={`${geistSans.variable} h-full antialiased`}
-      suppressHydrationWarning
-    >
+    <html lang="es" className={`${geistSans.variable} h-full antialiased`} suppressHydrationWarning>
       <body className="flex min-h-full flex-col">
-        <header className="border-b border-stone-200 bg-white print:hidden">
-          <div className="mx-auto flex max-w-5xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-            <Link href="/" className="text-lg font-bold text-stone-900">
-              Chatarrería El Cocha
+        <header className="bg-marca-900 sticky top-0 z-30 text-white shadow-sm print:hidden">
+          <div className="mx-auto flex min-h-14 max-w-5xl items-center justify-between gap-3 px-4">
+            <Link href="/" className="flex items-center gap-2 font-bold">
+              <Image
+                src="/icon.svg"
+                alt=""
+                width={32}
+                height={32}
+                unoptimized
+                className="rounded-lg"
+              />
+              <span>
+                El Cocha
+                <span className="text-marca-100 hidden font-normal lg:inline"> · Chatarrería</span>
+              </span>
             </Link>
             {sesion ? (
-              <div className="flex flex-wrap items-center justify-between gap-3 sm:justify-end">
+              <div className="flex items-center gap-2">
                 <NavegacionPrincipal />
                 <form action={cerrarSesionAccion}>
                   <button
                     type="submit"
-                    className="min-h-10 rounded-md border border-stone-300 px-3 text-sm font-semibold text-stone-700 transition hover:bg-stone-100"
+                    className="text-marca-100 hover:bg-marca-800 min-h-10 rounded-lg px-3 text-sm font-medium transition hover:text-white"
                   >
                     Salir
                   </button>
@@ -61,7 +69,13 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             ) : null}
           </div>
         </header>
-        <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">{children}</main>
+        {/* pb-24 en el teléfono: deja espacio para la barra de navegación inferior. */}
+        <main
+          className={`mx-auto w-full max-w-5xl flex-1 px-4 pt-6 ${sesion ? "pb-24 sm:pb-10" : "pb-10"}`}
+        >
+          {children}
+        </main>
+        {sesion && <NavegacionInferior />}
       </body>
     </html>
   );

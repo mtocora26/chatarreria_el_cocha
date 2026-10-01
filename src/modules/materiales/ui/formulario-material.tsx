@@ -68,12 +68,12 @@ export function FormularioMaterial({ accion, valoresIniciales }: FormularioMater
         ))}
       </div>
 
-      <label className="flex items-center gap-2 text-sm text-stone-700">
+      <label className="flex min-h-11 items-center gap-2 text-sm text-stone-700">
         <input
           type="checkbox"
           name="activo"
           defaultChecked={valores?.activo ?? true}
-          className="size-4 accent-amber-600"
+          className="accent-marca-900 size-4"
         />
         Activo (se ofrece en nuevas compras y ventas)
       </label>

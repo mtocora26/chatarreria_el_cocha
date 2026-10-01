@@ -15,7 +15,7 @@ export function Recibo({ operacion }: { operacion: DetalleOperacion }) {
   const tarifa = operacion.lineas.find((l) => l.tarifa)?.tarifa;
 
   return (
-    <article className="mx-auto max-w-2xl rounded-lg border border-stone-200 bg-white p-6 text-stone-900 shadow-sm print:max-w-none print:border-0 print:p-0 print:shadow-none">
+    <article className="mx-auto max-w-2xl rounded-xl border border-stone-200 bg-white p-4 text-stone-900 shadow-sm sm:p-6 print:max-w-none print:border-0 print:p-0 print:shadow-none">
       <header className="border-b border-stone-300 pb-4">
         <p className="text-xl font-bold">{NOMBRE_NEGOCIO}</p>
         <h1 className="mt-1 text-lg font-semibold">{TITULOS[operacion.tipo]}</h1>
@@ -31,10 +31,26 @@ export function Recibo({ operacion }: { operacion: DetalleOperacion }) {
             </>
           )}
         </dl>
-        {operacion.estado === "anulada" && (
-          <p className="mt-3 rounded border-2 border-red-700 px-3 py-1 text-center font-bold tracking-widest text-red-700 uppercase">
-            Anulada
+        {operacion.corrigeA && (
+          <p className="mt-3 text-sm text-stone-600">
+            Corrige el recibo N.º {numeroRecibo(operacion.corrigeA.consecutivo)}.
           </p>
+        )}
+        {operacion.estado === "anulada" && (
+          <div className="mt-3 rounded border-2 border-red-700 px-3 py-2 text-center text-red-800">
+            <p className="font-bold tracking-widest uppercase">Anulada</p>
+            {operacion.anulacion && (
+              <p className="mt-1 text-sm">
+                {formatearFechaHora(operacion.anulacion.fecha)} · {operacion.anulacion.usuario} ·
+                Motivo: {operacion.anulacion.motivo}
+              </p>
+            )}
+            {operacion.corregidaPor && (
+              <p className="mt-1 text-sm">
+                Reemplazada por el recibo N.º {numeroRecibo(operacion.corregidaPor.consecutivo)}.
+              </p>
+            )}
+          </div>
         )}
       </header>
 

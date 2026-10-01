@@ -1,16 +1,44 @@
-import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, desc, eq, exists, gte, inArray, lt, sql, type SQL } from "drizzle-orm";
 import type { BaseDeDatos } from "@/server/db/cliente";
-import { lineasTransaccion, materiales, transacciones } from "@/server/db/schema";
+import { authUser, lineasTransaccion, materiales, transacciones } from "@/server/db/schema";
 import { pesosANumeric, pesosDesdeNumeric } from "@/shared/dominio/dinero";
 import { gramosANumeric, gramosDesdeNumeric } from "@/shared/dominio/peso";
-import { exito } from "@/shared/dominio/resultado";
-import type { RepositorioOperaciones } from "../application/casos-de-uso";
-import { verificarStock, type NuevaOperacion } from "../domain/operacion";
+import { exito, fallo, type Resultado } from "@/shared/dominio/resultado";
+import type {
+  DatosAnulacion,
+  ErrorAnulacion,
+  FiltroHistorial,
+  RepositorioOperaciones,
+} from "../application/casos-de-uso";
+import { verificarStock, type NuevaOperacion, type StockInsuficiente } from "../domain/operacion";
 
-type Ejecutor = Pick<BaseDeDatos, "select" | "insert">;
+type Ejecutor = Pick<BaseDeDatos, "select" | "selectDistinct" | "insert" | "update">;
 
 // Las compras suman y las ventas restan; las anuladas no cuentan.
 const pesoConSigno = sql<string>`sum(case when ${transacciones.tipo} = 'compra' then ${lineasTransaccion.pesoKg} else -${lineasTransaccion.pesoKg} end)`;
+
+/** Un resultado fallido dentro de la transacción la revierte y se devuelve tal cual. */
+class Reversion<E> extends Error {
+  constructor(readonly error: E) {
+    super("Transacción revertida");
+  }
+}
+
+async function enTransaccion<T, E>(
+  db: BaseDeDatos,
+  trabajo: (tx: Ejecutor) => Promise<Resultado<T, E>>,
+): Promise<Resultado<T, E>> {
+  try {
+    return await db.transaction(async (tx) => {
+      const resultado = await trabajo(tx);
+      if (!resultado.ok) throw new Reversion(resultado.error);
+      return resultado;
+    });
+  } catch (error) {
+    if (error instanceof Reversion) return fallo(error.error as E);
+    throw error;
+  }
+}
 
 async function consultarStock(ejecutor: Ejecutor, materialIds?: string[]) {
   const filas = await ejecutor
@@ -27,10 +55,75 @@ async function consultarStock(ejecutor: Ejecutor, materialIds?: string[]) {
   return new Map(filas.map((f) => [f.materialId, gramosDesdeNumeric(f.pesoKg)]));
 }
 
-async function insertar(ejecutor: Ejecutor, operacion: NuevaOperacion) {
+/**
+ * Bloquea los materiales hasta el commit: otra operación concurrente sobre el mismo
+ * material espera aquí y luego ve el stock actualizado. Orden fijo para evitar
+ * interbloqueos. Toda operación que reduzca stock debe pasar por aquí.
+ */
+async function bloquearMateriales(ejecutor: Ejecutor, ids: string[]) {
+  if (ids.length === 0) return;
+  await ejecutor
+    .select({ id: materiales.id })
+    .from(materiales)
+    .where(inArray(materiales.id, ids))
+    .orderBy(asc(materiales.id))
+    .for("update");
+}
+
+async function materialesDe(ejecutor: Ejecutor, transaccionId: string) {
+  const filas = await ejecutor
+    .selectDistinct({ materialId: lineasTransaccion.materialId })
+    .from(lineasTransaccion)
+    .where(eq(lineasTransaccion.transaccionId, transaccionId));
+  return filas.map((f) => f.materialId);
+}
+
+/** Primer material cuyo stock quedó negativo, por nombre; null si todos están bien. */
+async function materialConStockNegativo(ejecutor: Ejecutor, ids: string[]) {
+  const stock = await consultarStock(ejecutor, ids);
+  const negativos = ids.filter((id) => (stock.get(id) ?? 0) < 0);
+  if (negativos.length === 0) return null;
+  const [material] = await ejecutor
+    .select({ nombre: materiales.nombre })
+    .from(materiales)
+    .where(inArray(materiales.id, negativos))
+    .orderBy(asc(materiales.nombre))
+    .limit(1);
+  return material.nombre;
+}
+
+/**
+ * Marca la operación como anulada solo si sigue activa: dos anulaciones simultáneas
+ * no pueden aplicar el ajuste dos veces.
+ */
+async function marcarAnulada(
+  ejecutor: Ejecutor,
+  id: string,
+  datos: DatosAnulacion,
+): Promise<Resultado<"compra" | "venta", ErrorAnulacion>> {
+  const [anulada] = await ejecutor
+    .update(transacciones)
+    .set({
+      estado: "anulada",
+      anuladaEn: new Date(),
+      anuladaPor: datos.usuarioId,
+      motivoAnulacion: datos.motivo,
+    })
+    .where(and(eq(transacciones.id, id), eq(transacciones.estado, "activa")))
+    .returning({ tipo: transacciones.tipo });
+  if (anulada) return exito(anulada.tipo);
+
+  const [existente] = await ejecutor
+    .select({ id: transacciones.id })
+    .from(transacciones)
+    .where(eq(transacciones.id, id));
+  return fallo({ tipo: existente ? "ya_anulada" : "no_encontrada" });
+}
+
+async function insertar(ejecutor: Ejecutor, operacion: NuevaOperacion, corrigeA?: string) {
   const [guardada] = await ejecutor
     .insert(transacciones)
-    .values({ tipo: operacion.tipo, total: pesosANumeric(operacion.total) })
+    .values({ tipo: operacion.tipo, total: pesosANumeric(operacion.total), corrigeA })
     .returning({ id: transacciones.id, consecutivo: transacciones.consecutivo });
 
   await ejecutor.insert(lineasTransaccion).values(
@@ -49,6 +142,27 @@ async function insertar(ejecutor: Ejecutor, operacion: NuevaOperacion) {
   return guardada;
 }
 
+function condicionesHistorial(filtro: FiltroHistorial, ejecutor: Ejecutor) {
+  return [
+    filtro.tipo ? eq(transacciones.tipo, filtro.tipo) : undefined,
+    filtro.desde ? gte(transacciones.fecha, filtro.desde) : undefined,
+    filtro.hasta ? lt(transacciones.fecha, filtro.hasta) : undefined,
+    filtro.materialId
+      ? exists(
+          ejecutor
+            .select({ uno: sql`1` })
+            .from(lineasTransaccion)
+            .where(
+              and(
+                eq(lineasTransaccion.transaccionId, transacciones.id),
+                eq(lineasTransaccion.materialId, filtro.materialId),
+              ),
+            ),
+        )
+      : undefined,
+  ];
+}
+
 export function crearRepositorioOperaciones(obtenerDb: () => BaseDeDatos): RepositorioOperaciones {
   return {
     // Encabezado y líneas en una transacción: si algo falla no queda una operación parcial.
@@ -56,17 +170,8 @@ export function crearRepositorioOperaciones(obtenerDb: () => BaseDeDatos): Repos
 
     guardarVenta: (operacion) =>
       obtenerDb().transaction(async (tx) => {
-        // Bloquea los materiales vendidos hasta el commit: otra venta concurrente del mismo
-        // material espera aquí y luego ve el stock ya descontado. Orden fijo para evitar
-        // interbloqueos. Cualquier operación futura que reduzca stock (p. ej. anular una
-        // compra) debe tomar el mismo bloqueo.
         const ids = [...new Set(operacion.lineas.map((l) => l.materialId))];
-        await tx
-          .select({ id: materiales.id })
-          .from(materiales)
-          .where(inArray(materiales.id, ids))
-          .orderBy(asc(materiales.id))
-          .for("update");
+        await bloquearMateriales(tx, ids);
 
         const stock = await consultarStock(tx, ids);
         const verificacion = verificarStock(operacion.lineas, stock);
@@ -75,37 +180,120 @@ export function crearRepositorioOperaciones(obtenerDb: () => BaseDeDatos): Repos
         return exito(await insertar(tx, operacion));
       }),
 
+    anular: (id, datos) =>
+      enTransaccion<void, ErrorAnulacion>(obtenerDb(), async (tx) => {
+        const ids = await materialesDe(tx, id);
+        await bloquearMateriales(tx, ids);
+
+        const anulada = await marcarAnulada(tx, id, datos);
+        if (!anulada.ok) return anulada;
+
+        // Anular una venta devuelve stock; anular una compra lo quita y puede dejarlo negativo.
+        if (anulada.valor === "compra") {
+          const material = await materialConStockNegativo(tx, ids);
+          if (material) return fallo({ tipo: "stock_negativo", material });
+        }
+        return exito(undefined);
+      }),
+
+    guardarCorreccion: (id, nueva, datos) =>
+      enTransaccion<{ id: string; consecutivo: number }, ErrorAnulacion | StockInsuficiente>(
+        obtenerDb(),
+        async (tx) => {
+          const nuevosIds = nueva.lineas.map((l) => l.materialId);
+          const ids = [...new Set([...(await materialesDe(tx, id)), ...nuevosIds])];
+          await bloquearMateriales(tx, ids);
+
+          const anulada = await marcarAnulada(tx, id, datos);
+          if (!anulada.ok) return anulada;
+          if (anulada.valor !== nueva.tipo) return fallo({ tipo: "tipo_distinto" });
+
+          // El stock ya excluye la operación anulada: la venta corregida puede usar lo que
+          // devolvió la original.
+          if (nueva.tipo === "venta") {
+            const verificacion = verificarStock(nueva.lineas, await consultarStock(tx, nuevosIds));
+            if (!verificacion.ok) return verificacion;
+          }
+
+          const guardada = await insertar(tx, nueva, id);
+
+          if (nueva.tipo === "compra") {
+            const material = await materialConStockNegativo(tx, ids);
+            if (material) return fallo({ tipo: "stock_negativo", material });
+          }
+          return exito(guardada);
+        },
+      ),
+
     consultarStock: (materialIds) => consultarStock(obtenerDb(), materialIds),
 
     async obtenerDetalle(id) {
       const db = obtenerDb();
-      const [encabezado] = await db.select().from(transacciones).where(eq(transacciones.id, id));
-      if (!encabezado) return null;
-
-      const lineas = await db
+      const [transaccion] = await db
         .select({
-          material: materiales.nombre,
-          pesoKg: lineasTransaccion.pesoKg,
-          cantidadPeso: lineasTransaccion.cantidadPeso,
-          unidadPeso: lineasTransaccion.unidadPeso,
-          equivalenciaKg: lineasTransaccion.equivalenciaKg,
-          precioUnitario: lineasTransaccion.precioUnitario,
-          tarifa: lineasTransaccion.tarifa,
-          subtotal: lineasTransaccion.subtotal,
+          id: transacciones.id,
+          consecutivo: transacciones.consecutivo,
+          tipo: transacciones.tipo,
+          estado: transacciones.estado,
+          fecha: transacciones.fecha,
+          total: transacciones.total,
+          anuladaEn: transacciones.anuladaEn,
+          motivoAnulacion: transacciones.motivoAnulacion,
+          usuarioAnulacion: authUser.name,
+          corrigeA: transacciones.corrigeA,
         })
-        .from(lineasTransaccion)
-        .innerJoin(materiales, eq(materiales.id, lineasTransaccion.materialId))
-        .where(eq(lineasTransaccion.transaccionId, id))
-        .orderBy(asc(materiales.nombre), asc(lineasTransaccion.pesoKg));
+        .from(transacciones)
+        .leftJoin(authUser, eq(authUser.id, transacciones.anuladaPor))
+        .where(eq(transacciones.id, id));
+      if (!transaccion) return null;
+
+      const referencia = (condicion: SQL) =>
+        db
+          .select({ id: transacciones.id, consecutivo: transacciones.consecutivo })
+          .from(transacciones)
+          .where(condicion)
+          .then(([fila]) => fila ?? null);
+
+      const [lineas, corrigeA, corregidaPor] = await Promise.all([
+        db
+          .select({
+            materialId: lineasTransaccion.materialId,
+            material: materiales.nombre,
+            pesoKg: lineasTransaccion.pesoKg,
+            cantidadPeso: lineasTransaccion.cantidadPeso,
+            unidadPeso: lineasTransaccion.unidadPeso,
+            equivalenciaKg: lineasTransaccion.equivalenciaKg,
+            precioUnitario: lineasTransaccion.precioUnitario,
+            tarifa: lineasTransaccion.tarifa,
+            subtotal: lineasTransaccion.subtotal,
+          })
+          .from(lineasTransaccion)
+          .innerJoin(materiales, eq(materiales.id, lineasTransaccion.materialId))
+          .where(eq(lineasTransaccion.transaccionId, id))
+          .orderBy(asc(materiales.nombre), asc(lineasTransaccion.pesoKg)),
+        transaccion.corrigeA ? referencia(eq(transacciones.id, transaccion.corrigeA)) : null,
+        referencia(eq(transacciones.corrigeA, id)),
+      ]);
 
       return {
-        id: encabezado.id,
-        consecutivo: encabezado.consecutivo,
-        tipo: encabezado.tipo,
-        estado: encabezado.estado,
-        fecha: encabezado.fecha,
-        total: pesosDesdeNumeric(encabezado.total),
+        id: transaccion.id,
+        consecutivo: transaccion.consecutivo,
+        tipo: transaccion.tipo,
+        estado: transaccion.estado,
+        fecha: transaccion.fecha,
+        total: pesosDesdeNumeric(transaccion.total),
+        anulacion:
+          transaccion.anuladaEn && transaccion.motivoAnulacion
+            ? {
+                fecha: transaccion.anuladaEn,
+                usuario: transaccion.usuarioAnulacion ?? "Usuario eliminado",
+                motivo: transaccion.motivoAnulacion,
+              }
+            : null,
+        corrigeA,
+        corregidaPor,
         lineas: lineas.map((l) => ({
+          materialId: l.materialId,
           material: l.material,
           gramos: gramosDesdeNumeric(l.pesoKg),
           cantidadPeso: Number(l.cantidadPeso),
@@ -118,23 +306,34 @@ export function crearRepositorioOperaciones(obtenerDb: () => BaseDeDatos): Repos
       };
     },
 
-    async listarRecientes(tipo, limite) {
+    async listar(filtro, limite, antesDe) {
       const db = obtenerDb();
       const encabezados = await db
         .select({
           id: transacciones.id,
           consecutivo: transacciones.consecutivo,
+          tipo: transacciones.tipo,
+          estado: transacciones.estado,
           fecha: transacciones.fecha,
           total: transacciones.total,
         })
         .from(transacciones)
-        .where(eq(transacciones.tipo, tipo))
+        .where(
+          and(
+            ...condicionesHistorial(filtro, db),
+            antesDe ? lt(transacciones.consecutivo, antesDe) : undefined,
+          ),
+        )
+        // El consecutivo crece con cada registro: sirve de cursor estable aunque entren nuevas.
         .orderBy(desc(transacciones.consecutivo))
         .limit(limite);
       if (encabezados.length === 0) return [];
 
       const lineas = await db
-        .select({ transaccionId: lineasTransaccion.transaccionId, nombre: materiales.nombre })
+        .selectDistinct({
+          transaccionId: lineasTransaccion.transaccionId,
+          nombre: materiales.nombre,
+        })
         .from(lineasTransaccion)
         .innerJoin(materiales, eq(materiales.id, lineasTransaccion.materialId))
         .where(
@@ -143,15 +342,39 @@ export function crearRepositorioOperaciones(obtenerDb: () => BaseDeDatos): Repos
             encabezados.map((e) => e.id),
           ),
         )
-        .orderBy(asc(materiales.nombre));
+        .orderBy(asc(lineasTransaccion.transaccionId), asc(materiales.nombre));
 
       return encabezados.map((encabezado) => ({
         ...encabezado,
         total: pesosDesdeNumeric(encabezado.total),
-        materiales: [
-          ...new Set(lineas.filter((l) => l.transaccionId === encabezado.id).map((l) => l.nombre)),
-        ],
+        materiales: lineas.filter((l) => l.transaccionId === encabezado.id).map((l) => l.nombre),
       }));
+    },
+
+    async resumir(filtro) {
+      const db = obtenerDb();
+      const filas = await db
+        .select({
+          tipo: transacciones.tipo,
+          estado: transacciones.estado,
+          cantidad: sql<number>`count(*)::int`,
+          total: sql<string>`coalesce(sum(${transacciones.total}), 0)`,
+        })
+        .from(transacciones)
+        .where(and(...condicionesHistorial(filtro, db)))
+        .groupBy(transacciones.tipo, transacciones.estado);
+
+      const activas = (tipo: "compra" | "venta") => {
+        const fila = filas.find((f) => f.tipo === tipo && f.estado === "activa");
+        return { cantidad: fila?.cantidad ?? 0, total: pesosDesdeNumeric(fila?.total ?? "0") };
+      };
+      return {
+        compras: activas("compra"),
+        ventas: activas("venta"),
+        anuladas: filas
+          .filter((f) => f.estado === "anulada")
+          .reduce((suma, f) => suma + f.cantidad, 0),
+      };
     },
   };
 }

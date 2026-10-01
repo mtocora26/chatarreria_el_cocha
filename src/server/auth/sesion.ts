@@ -12,3 +12,16 @@ export async function exigirSesion() {
   if (!sesion) redirect("/ingresar");
   return sesion;
 }
+
+type Sesion = NonNullable<Awaited<ReturnType<typeof obtenerSesion>>>;
+
+/** Anular y corregir operaciones es exclusivo del administrador. */
+export function esAdmin(sesion: Sesion): boolean {
+  return sesion.user.role === "admin";
+}
+
+/** Para server actions: devuelve la sesión solo si es de un administrador. */
+export async function exigirAdmin(): Promise<Sesion | null> {
+  const sesion = await exigirSesion();
+  return esAdmin(sesion) ? sesion : null;
+}

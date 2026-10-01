@@ -1,15 +1,10 @@
 export type Seccion = {
-  href: "/materiales" | "/compras" | "/ventas" | "/inventario";
+  href: "/compras" | "/ventas" | "/inventario" | "/historial" | "/materiales";
   titulo: string;
   descripcion: string;
 };
 
 export const SECCIONES: readonly Seccion[] = [
-  {
-    href: "/materiales",
-    titulo: "Materiales",
-    descripcion: "Materiales y precios por kilo de compra y venta.",
-  },
   {
     href: "/compras",
     titulo: "Compras",
@@ -24,5 +19,15 @@ export const SECCIONES: readonly Seccion[] = [
     href: "/inventario",
     titulo: "Inventario",
     descripcion: "Kilos disponibles de cada material.",
+  },
+  {
+    href: "/historial",
+    titulo: "Historial",
+    descripcion: "Consultar, anular o corregir compras y ventas.",
+  },
+  {
+    href: "/materiales",
+    titulo: "Materiales",
+    descripcion: "Materiales y precios por kilo de compra y venta.",
   },
 ];

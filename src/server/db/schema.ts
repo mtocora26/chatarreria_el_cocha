@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  type AnyPgColumn,
   boolean,
   check,
   index,
@@ -149,11 +150,23 @@ export const transacciones = pgTable(
     total: dinero().notNull(),
     medioPago: text(),
     estado: estadoTransaccion().notNull().default("activa"),
+    // Las operaciones no se borran ni se editan: se anulan dejando quién, cuándo y por qué.
+    anuladaEn: timestamp({ withTimezone: true }),
+    anuladaPor: text().references(() => authUser.id, { onDelete: "restrict" }),
+    motivoAnulacion: text(),
+    // Operación anulada que esta reemplaza (flujo "Corregir"); una operación se corrige una vez.
+    corrigeA: uuid().references((): AnyPgColumn => transacciones.id, { onDelete: "restrict" }),
     ...marcasDeTiempo,
   },
   (t) => [
     index("transacciones_fecha_idx").on(t.fecha),
+    uniqueIndex("transacciones_corrige_a_unico").on(t.corrigeA),
     check("transacciones_total_no_negativo", sql`${t.total} >= 0`),
+    check(
+      "transacciones_anulacion_completa",
+      sql`(${t.estado} = 'activa' AND ${t.anuladaEn} IS NULL AND ${t.anuladaPor} IS NULL AND ${t.motivoAnulacion} IS NULL)
+        OR (${t.estado} = 'anulada' AND ${t.anuladaEn} IS NOT NULL AND ${t.anuladaPor} IS NOT NULL AND ${t.motivoAnulacion} IS NOT NULL)`,
+    ),
   ],
 );
 

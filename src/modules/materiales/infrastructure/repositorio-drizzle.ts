@@ -1,7 +1,7 @@
 import { asc, eq, inArray } from "drizzle-orm";
 import type { BaseDeDatos } from "@/server/db/cliente";
-import { esViolacionUnica } from "@/server/db/errores";
-import { materiales } from "@/server/db/schema";
+import { esViolacionLlaveForanea, esViolacionUnica } from "@/server/db/errores";
+import { lineasTransaccion, materiales } from "@/server/db/schema";
 import { pesosANumeric, pesosDesdeNumeric } from "@/shared/dominio/dinero";
 import { exito, fallo } from "@/shared/dominio/resultado";
 import type { RepositorioMateriales } from "../application/casos-de-uso";
@@ -76,6 +76,39 @@ export function crearRepositorioMateriales(obtenerDb: () => BaseDeDatos): Reposi
         return fila ? exito(aMaterial(fila)) : fallo("no_encontrado");
       } catch (error) {
         if (esViolacionUnica(error)) return fallo("nombre_duplicado");
+        throw error;
+      }
+    },
+
+    async tieneMovimientos(id) {
+      const [linea] = await obtenerDb()
+        .select({ id: lineasTransaccion.id })
+        .from(lineasTransaccion)
+        .where(eq(lineasTransaccion.materialId, id))
+        .limit(1);
+      return linea !== undefined;
+    },
+
+    async cambiarActivo(id, activo) {
+      const [fila] = await obtenerDb()
+        .update(materiales)
+        .set({ activo })
+        .where(eq(materiales.id, id))
+        .returning();
+      return fila ? exito(aMaterial(fila)) : fallo("no_encontrado");
+    },
+
+    async eliminar(id) {
+      try {
+        const [fila] = await obtenerDb()
+          .delete(materiales)
+          .where(eq(materiales.id, id))
+          .returning({ id: materiales.id });
+        return fila ? exito(undefined) : fallo("no_encontrado");
+      } catch (error) {
+        // La llave foránea con restrict es la verificación definitiva: cubre también
+        // una compra registrada entre la consulta de movimientos y el borrado.
+        if (esViolacionLlaveForanea(error)) return fallo("tiene_movimientos");
         throw error;
       }
     },

@@ -13,6 +13,9 @@ export const metadata: Metadata = { title: "Materiales" };
 const MENSAJES_GUARDADO: Record<string, string> = {
   creado: "Material creado.",
   actualizado: "Cambios guardados.",
+  eliminado: "Material eliminado.",
+  desactivado: "Material desactivado. Ya no aparece en compras ni ventas.",
+  reactivado: "Material reactivado.",
 };
 
 export default async function PaginaMateriales({ searchParams }: PageProps<"/materiales">) {

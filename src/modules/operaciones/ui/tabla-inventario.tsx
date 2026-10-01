@@ -12,15 +12,18 @@ export function TablaInventario({ existencias }: { existencias: ExistenciaMateri
   }
 
   return (
-    <div className={`${claseTarjeta} relative overflow-x-auto`}>
+    <div className={`${claseTarjeta} overflow-hidden`}>
       <table className="w-full text-sm">
         <caption className="sr-only">Stock disponible por material en kilogramos</caption>
         <thead className="bg-stone-100 text-left text-stone-700">
           <tr>
-            <th scope="col" className="px-4 py-3 font-semibold">
+            <th scope="col" className="px-4 py-3 text-xs font-semibold tracking-wide uppercase">
               Material
             </th>
-            <th scope="col" className="px-4 py-3 text-right font-semibold">
+            <th
+              scope="col"
+              className="px-4 py-3 text-right text-xs font-semibold tracking-wide uppercase"
+            >
               Disponible
             </th>
           </tr>
@@ -33,7 +36,7 @@ export function TablaInventario({ existencias }: { existencias: ExistenciaMateri
                 {!existencia.activo && <span className="ml-2 text-xs font-normal">(inactivo)</span>}
               </th>
               <td
-                className={`px-4 py-3 text-right tabular-nums ${existencia.stock === 0 ? "text-stone-400" : "font-semibold"}`}
+                className={`px-4 py-3 text-right tabular-nums ${existencia.stock === 0 ? "text-stone-400" : "text-base font-semibold"}`}
               >
                 {formatearKgResumido(existencia.stock)}
               </td>

@@ -1,7 +1,11 @@
 import Link from "next/link";
-import { formatearCOP } from "@/shared/dominio/dinero";
-import { claseTarjeta } from "@/shared/ui/estilos";
+import { formatearCOP, type Pesos } from "@/shared/dominio/dinero";
+import { claseInsignia, claseTarjeta } from "@/shared/ui/estilos";
 import type { Material } from "../domain/material";
+
+const precio = (valor: Pesos | null) => (valor === null ? "—" : formatearCOP(valor));
+
+const COLUMNAS = "sm:grid-cols-[minmax(0,1.5fr)_repeat(3,minmax(0,1fr))_5rem]";
 
 export function TablaMateriales({ materiales }: { materiales: Material[] }) {
   if (materiales.length === 0) {
@@ -13,63 +17,49 @@ export function TablaMateriales({ materiales }: { materiales: Material[] }) {
   }
 
   return (
-    <div className={`${claseTarjeta} relative overflow-x-auto`}>
-      <table className="w-full min-w-xl text-sm">
-        <caption className="sr-only">Materiales y precios por kilo en COP</caption>
-        <thead className="bg-stone-100 text-left text-stone-700">
-          <tr>
-            <th scope="col" className="px-4 py-3 font-semibold">
-              Material
-            </th>
-            <th scope="col" className="px-4 py-3 text-right font-semibold">
-              Compra minorista
-            </th>
-            <th scope="col" className="px-4 py-3 text-right font-semibold">
-              Compra mayorista
-            </th>
-            <th scope="col" className="px-4 py-3 text-right font-semibold">
-              Venta
-            </th>
-            <th scope="col" className="px-4 py-3 font-semibold">
-              Estado
-            </th>
-            <th scope="col" className="px-4 py-3">
-              <span className="sr-only">Acciones</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-stone-200">
-          {materiales.map((material) => (
-            <tr key={material.id} className={material.activo ? "" : "text-stone-400"}>
-              <th scope="row" className="px-4 py-3 text-left font-medium">
+    <div className={`${claseTarjeta} overflow-hidden`}>
+      <div
+        aria-hidden
+        className={`hidden gap-4 bg-stone-100 px-4 py-2 text-xs font-semibold tracking-wide text-stone-600 uppercase sm:grid ${COLUMNAS}`}
+      >
+        <span>Material</span>
+        <span className="text-right">Compra minorista</span>
+        <span className="text-right">Compra mayorista</span>
+        <span className="text-right">Venta</span>
+        <span />
+      </div>
+      <ul className="divide-y divide-stone-200">
+        {materiales.map((material) => (
+          <li key={material.id}>
+            <Link
+              href={`/materiales/${material.id}`}
+              className={`hover:bg-marca-50 grid grid-cols-3 gap-x-4 gap-y-1 px-4 py-3 transition-colors sm:items-center ${COLUMNAS} ${material.activo ? "" : "text-stone-400"}`}
+            >
+              <span className="col-span-3 flex items-center gap-2 font-semibold sm:col-span-1">
                 {material.nombre}
-              </th>
-              <td className="px-4 py-3 text-right tabular-nums">
-                {material.precioCompraMinorista === null
-                  ? "Sin definir"
-                  : formatearCOP(material.precioCompraMinorista)}
-              </td>
-              <td className="px-4 py-3 text-right tabular-nums">
-                {material.precioCompraMayorista === null
-                  ? "Sin definir"
-                  : formatearCOP(material.precioCompraMayorista)}
-              </td>
-              <td className="px-4 py-3 text-right tabular-nums">
-                {material.precioVenta === null ? "Sin definir" : formatearCOP(material.precioVenta)}
-              </td>
-              <td className="px-4 py-3">{material.activo ? "Activo" : "Inactivo"}</td>
-              <td className="px-4 py-3 text-right">
-                <Link
-                  href={`/materiales/${material.id}`}
-                  className="font-medium text-amber-700 hover:underline"
-                >
-                  Editar<span className="sr-only"> {material.nombre}</span>
-                </Link>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                {!material.activo && (
+                  <span className={`${claseInsignia} bg-stone-100 text-stone-600`}>Inactivo</span>
+                )}
+              </span>
+              <span className="text-sm tabular-nums sm:text-right">
+                <span className="block text-xs text-stone-500 sm:hidden">Minorista</span>
+                {precio(material.precioCompraMinorista)}
+              </span>
+              <span className="text-sm tabular-nums sm:text-right">
+                <span className="block text-xs text-stone-500 sm:hidden">Mayorista</span>
+                {precio(material.precioCompraMayorista)}
+              </span>
+              <span className="text-sm tabular-nums sm:text-right">
+                <span className="block text-xs text-stone-500 sm:hidden">Venta</span>
+                {precio(material.precioVenta)}
+              </span>
+              <span className="text-marca-700 hidden text-right text-sm font-medium sm:block">
+                Editar
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

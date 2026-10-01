@@ -40,7 +40,17 @@ function preparar(stockDisponible = new Map<string, number>()) {
     },
     consultarStock: async () => stockDisponible,
     obtenerDetalle: async () => null,
-    listarRecientes: async () => [],
+    listar: async () => [],
+    resumir: async () => ({
+      compras: { cantidad: 0, total: 0 },
+      ventas: { cantidad: 0, total: 0 },
+      anuladas: 0,
+    }),
+    anular: async () => ({ ok: true, valor: undefined }),
+    guardarCorreccion: async (_id, operacion) => {
+      guardadas.push(operacion);
+      return { ok: true, valor: { id: "id", consecutivo: guardadas.length } };
+    },
   };
   const casos = crearCasosDeUsoOperaciones(repositorio, {
     listarMateriales: async () => catalogo,

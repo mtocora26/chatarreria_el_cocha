@@ -4,7 +4,7 @@ import type { Material } from "../domain/material";
 import { crearCasosDeUsoMateriales, type RepositorioMateriales } from "./casos-de-uso";
 import type { EntradaMaterial } from "./validacion";
 
-function repositorioEnMemoria(): RepositorioMateriales {
+function repositorioEnMemoria(conMovimientos: string[] = []): RepositorioMateriales {
   const guardados: Material[] = [];
   const nombreOcupado = (nombre: string, excepto?: string) =>
     guardados.some((m) => m.id !== excepto && m.nombre.toLowerCase() === nombre.toLowerCase());
@@ -25,6 +25,20 @@ function repositorioEnMemoria(): RepositorioMateriales {
       if (nombreOcupado(datos.nombre, id)) return fallo("nombre_duplicado");
       guardados[indice] = { ...datos, id };
       return exito(guardados[indice]);
+    },
+    tieneMovimientos: async (id) => conMovimientos.includes(id),
+    async cambiarActivo(id, activo) {
+      const material = guardados.find((m) => m.id === id);
+      if (!material) return fallo("no_encontrado");
+      material.activo = activo;
+      return exito(material);
+    },
+    async eliminar(id) {
+      const indice = guardados.findIndex((m) => m.id === id);
+      if (indice === -1) return fallo("no_encontrado");
+      if (conMovimientos.includes(id)) return fallo("tiene_movimientos");
+      guardados.splice(indice, 1);
+      return exito(undefined);
     },
   };
 }
@@ -91,5 +105,44 @@ describe("guardarMaterial", () => {
       ok: false,
       error: { tipo: "no_encontrado" },
     });
+  });
+});
+
+describe("eliminarMaterial", () => {
+  it("borra un material sin movimientos", async () => {
+    const casos = crearCasosDeUsoMateriales(repositorioEnMemoria());
+    const creado = await casos.guardarMaterial(null, entradaValida);
+    if (!creado.ok) throw new Error("no se creó");
+
+    expect(await casos.eliminarMaterial(creado.valor.id)).toEqual({ ok: true, valor: undefined });
+    expect(await casos.listarMateriales()).toEqual([]);
+  });
+
+  it("no borra un material con movimientos", async () => {
+    const repositorio = repositorioEnMemoria();
+    const casos = crearCasosDeUsoMateriales(repositorio);
+    const creado = await casos.guardarMaterial(null, entradaValida);
+    if (!creado.ok) throw new Error("no se creó");
+    const conMovimientos = crearCasosDeUsoMateriales({
+      ...repositorio,
+      tieneMovimientos: async () => true,
+      eliminar: async () => fallo("tiene_movimientos"),
+    });
+
+    expect(await conMovimientos.eliminarMaterial(creado.valor.id)).toEqual({
+      ok: false,
+      error: "tiene_movimientos",
+    });
+    expect(await casos.listarMateriales()).toHaveLength(1);
+  });
+
+  it("trata un id inválido como no encontrado sin consultar la base", async () => {
+    const casos = crearCasosDeUsoMateriales(repositorioEnMemoria());
+
+    expect(await casos.eliminarMaterial("no-es-uuid")).toEqual({
+      ok: false,
+      error: "no_encontrado",
+    });
+    expect(await casos.tieneMovimientos("no-es-uuid")).toBe(false);
   });
 });

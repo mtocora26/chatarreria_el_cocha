@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { materiales, type EntradaMaterial, type ErrorGuardarMaterial } from "@/modules/materiales";
 import type { EstadoFormularioMaterial } from "@/modules/materiales/ui/estado-formulario";
+import type { EstadoAccionConfirmada } from "@/shared/ui/dialogo-confirmacion";
 import { exigirSesion } from "@/server/auth/sesion";
 
 const texto = (formData: FormData, campo: string) => String(formData.get(campo) ?? "");
@@ -38,4 +39,32 @@ export async function guardarMaterialAccion(
 
   revalidatePath("/", "layout");
   redirect(`/materiales?guardado=${id === null ? "creado" : "actualizado"}`);
+}
+
+export async function eliminarMaterialAccion(id: string): Promise<EstadoAccionConfirmada> {
+  await exigirSesion();
+  const resultado = await materiales.eliminarMaterial(id);
+  if (!resultado.ok) {
+    return {
+      error:
+        resultado.error === "tiene_movimientos"
+          ? "Este material ya tiene compras o ventas; desactívalo en lugar de eliminarlo."
+          : "El material ya no existe.",
+    };
+  }
+
+  revalidatePath("/", "layout");
+  redirect("/materiales?guardado=eliminado");
+}
+
+export async function cambiarActivoMaterialAccion(
+  id: string,
+  activo: boolean,
+): Promise<EstadoAccionConfirmada> {
+  await exigirSesion();
+  const resultado = await materiales.cambiarActivo(id, activo);
+  if (!resultado.ok) return { error: "El material ya no existe." };
+
+  revalidatePath("/", "layout");
+  redirect(`/materiales?guardado=${activo ? "reactivado" : "desactivado"}`);
 }
