@@ -3,10 +3,12 @@ import { connection } from "next/server";
 import { operaciones } from "@/modules/operaciones";
 import { TablaInventario } from "@/modules/operaciones/ui/tabla-inventario";
 import { EncabezadoPagina } from "@/shared/ui/encabezado-pagina";
+import { exigirSesion } from "@/server/auth/sesion";
 
 export const metadata: Metadata = { title: "Inventario" };
 
 export default async function PaginaInventario() {
+  await exigirSesion();
   await connection();
   const existencias = await operaciones.consultarInventario();
 

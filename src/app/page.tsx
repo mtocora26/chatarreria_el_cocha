@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { SECCIONES } from "@/shared/navegacion/secciones";
 import { EncabezadoPagina } from "@/shared/ui/encabezado-pagina";
+import { exigirSesion } from "@/server/auth/sesion";
 
-export default function Inicio() {
+export default async function Inicio() {
+  await exigirSesion();
   return (
     <>
       <EncabezadoPagina titulo="Inicio" descripcion="¿Qué quieres hacer hoy?" />

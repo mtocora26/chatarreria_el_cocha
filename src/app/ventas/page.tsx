@@ -8,10 +8,12 @@ import { OperacionesRecientes } from "@/modules/operaciones/ui/operaciones-recie
 import { Aviso } from "@/shared/ui/aviso";
 import { EncabezadoPagina } from "@/shared/ui/encabezado-pagina";
 import { registrarVentaAccion } from "./acciones";
+import { exigirSesion } from "@/server/auth/sesion";
 
 export const metadata: Metadata = { title: "Ventas" };
 
 export default async function PaginaVentas() {
+  await exigirSesion();
   await connection();
   const [activos, stock, recientes] = await Promise.all([
     materiales.listarMaterialesActivos(),

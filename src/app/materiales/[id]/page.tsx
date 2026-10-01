@@ -4,10 +4,12 @@ import { materiales } from "@/modules/materiales";
 import { FormularioMaterial } from "@/modules/materiales/ui/formulario-material";
 import { EncabezadoPagina } from "@/shared/ui/encabezado-pagina";
 import { guardarMaterialAccion } from "../acciones";
+import { exigirSesion } from "@/server/auth/sesion";
 
 export const metadata: Metadata = { title: "Editar material" };
 
 export default async function PaginaEditarMaterial({ params }: PageProps<"/materiales/[id]">) {
+  await exigirSesion();
   const { id } = await params;
   const material = await materiales.obtenerMaterial(id);
   if (!material) notFound();

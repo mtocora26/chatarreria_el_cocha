@@ -6,6 +6,7 @@ import { TablaMateriales } from "@/modules/materiales/ui/tabla-materiales";
 import { Aviso } from "@/shared/ui/aviso";
 import { EncabezadoPagina } from "@/shared/ui/encabezado-pagina";
 import { claseBotonPrimario } from "@/shared/ui/estilos";
+import { exigirSesion } from "@/server/auth/sesion";
 
 export const metadata: Metadata = { title: "Materiales" };
 
@@ -15,6 +16,7 @@ const MENSAJES_GUARDADO: Record<string, string> = {
 };
 
 export default async function PaginaMateriales({ searchParams }: PageProps<"/materiales">) {
+  await exigirSesion();
   await connection();
   const [{ guardado }, lista] = await Promise.all([searchParams, materiales.listarMateriales()]);
   const mensaje = typeof guardado === "string" ? MENSAJES_GUARDADO[guardado] : undefined;

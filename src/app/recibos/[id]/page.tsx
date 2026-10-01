@@ -6,11 +6,13 @@ import { BotonImprimir } from "@/modules/operaciones/ui/boton-imprimir";
 import { numeroRecibo, Recibo } from "@/modules/operaciones/ui/recibo";
 import { Aviso } from "@/shared/ui/aviso";
 import { claseBotonSecundario } from "@/shared/ui/estilos";
+import { exigirSesion } from "@/server/auth/sesion";
 
 const RUTA_LISTADO = { compra: "/compras", venta: "/ventas" } as const;
 const NOMBRE = { compra: "Compra", venta: "Venta" } as const;
 
 async function cargar(id: string) {
+  await exigirSesion();
   const operacion = await operaciones.obtenerDetalle(id);
   if (!operacion) notFound();
   return operacion;
