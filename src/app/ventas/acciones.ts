@@ -4,11 +4,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { operaciones } from "@/modules/operaciones";
 import type { EstadoFormularioOperacion } from "@/modules/operaciones/ui/estado-formulario";
+import { exigirSesion } from "@/server/auth/sesion";
 
 export async function registrarVentaAccion(
   _estado: EstadoFormularioOperacion,
   formData: FormData,
 ): Promise<EstadoFormularioOperacion> {
+  await exigirSesion();
   const pesos = formData.getAll("pesoKg").map(String);
   const precios = formData.getAll("precioPorKg").map(String);
   const resultado = await operaciones.registrarVenta({

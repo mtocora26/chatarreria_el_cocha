@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { materiales, type EntradaMaterial, type ErrorGuardarMaterial } from "@/modules/materiales";
 import type { EstadoFormularioMaterial } from "@/modules/materiales/ui/estado-formulario";
+import { exigirSesion } from "@/server/auth/sesion";
 
 const texto = (formData: FormData, campo: string) => String(formData.get(campo) ?? "");
 
@@ -23,6 +24,7 @@ export async function guardarMaterialAccion(
   _estado: EstadoFormularioMaterial,
   formData: FormData,
 ): Promise<EstadoFormularioMaterial> {
+  await exigirSesion();
   const entrada: EntradaMaterial = {
     nombre: texto(formData, "nombre"),
     precioCompraMinorista: texto(formData, "precioCompraMinorista"),

@@ -18,9 +18,12 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "db:local": "tsx scripts/db-local.ts",
-    "db:demo": "tsx scripts/datos-demo.ts"
+    "db:demo": "tsx scripts/datos-demo.ts",
+    "auth:crear-admin": "npx auth@latest create-admin --config ./src/server/auth.ts"
   },
   "dependencies": {
+    "@better-auth/drizzle-adapter": "^1.7.6",
+    "better-auth": "^1.7.6",
     "drizzle-orm": "^0.45.3",
     "next": "16.3.7",
     "pg": "^8.23.0",

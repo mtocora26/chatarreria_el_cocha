@@ -13,6 +13,73 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
+export const authUser = pgTable("user", {
+  id: text().primaryKey().default(sql`gen_random_uuid()::text`),
+  name: text().notNull(),
+  email: text().notNull().unique(),
+  emailVerified: boolean().notNull().default(false),
+  image: text(),
+  role: text().notNull().default("user"),
+  banned: boolean().notNull().default(false),
+  banReason: text(),
+  banExpires: timestamp({ withTimezone: true }),
+  createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+});
+
+export const authSession = pgTable(
+  "session",
+  {
+    id: text().primaryKey().default(sql`gen_random_uuid()::text`),
+    expiresAt: timestamp({ withTimezone: true }).notNull(),
+    token: text().notNull().unique(),
+    createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+    ipAddress: text(),
+    userAgent: text(),
+    impersonatedBy: text(),
+    userId: text()
+      .notNull()
+      .references(() => authUser.id, { onDelete: "cascade" }),
+  },
+  (t) => [index("session_user_id_idx").on(t.userId)],
+);
+
+export const authAccount = pgTable(
+  "account",
+  {
+    id: text().primaryKey().default(sql`gen_random_uuid()::text`),
+    accountId: text().notNull(),
+    providerId: text().notNull(),
+    userId: text()
+      .notNull()
+      .references(() => authUser.id, { onDelete: "cascade" }),
+    accessToken: text(),
+    refreshToken: text(),
+    idToken: text(),
+    accessTokenExpiresAt: timestamp({ withTimezone: true }),
+    refreshTokenExpiresAt: timestamp({ withTimezone: true }),
+    scope: text(),
+    password: text(),
+    createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("account_user_id_idx").on(t.userId)],
+);
+
+export const authVerification = pgTable(
+  "verification",
+  {
+    id: text().primaryKey().default(sql`gen_random_uuid()::text`),
+    identifier: text().notNull(),
+    value: text().notNull(),
+    expiresAt: timestamp({ withTimezone: true }).notNull(),
+    createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("verification_identifier_idx").on(t.identifier)],
+);
+
 // Dinero en COP y peso en kg con gramos. Nunca float: evita errores de redondeo.
 const dinero = () => numeric({ precision: 14, scale: 2 });
 const pesoKg = () => numeric({ precision: 10, scale: 3 });
