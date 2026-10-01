@@ -10,27 +10,48 @@
     "typecheck": "next typegen && tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "npm run lint && npm run typecheck && npm run format:check"
+    "check": "npm run lint && npm run typecheck && npm run format:check && npm run test",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "db:verificar": "tsx scripts/verificar-db.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:local": "tsx scripts/db-local.ts",
+    "db:demo": "tsx scripts/datos-demo.ts",
+    "auth:crear-admin": "npx auth@latest create-admin --config ./src/server/auth.ts"
   },
   "dependencies": {
+    "@better-auth/drizzle-adapter": "^1.7.6",
+    "better-auth": "^1.7.6",
+    "drizzle-orm": "^0.45.3",
     "next": "16.3.7",
+    "pg": "^8.23.0",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "server-only": "^0.0.1",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@next/env": "^16.3.7",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^22.20.4",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "drizzle-kit": "^0.31.11",
+    "embedded-postgres": "^18.4.0-beta.17",
     "eslint": "^9",
     "eslint-config-next": "16.3.7",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.9.9",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vitest": "^5.0.2"
   },
   "engines": {
-    "node": ">=20.9"
+    "node": ">=22"
   }
 }

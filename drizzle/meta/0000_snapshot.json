@@ -1,0 +1,472 @@
+{
+  "id": "dae43e71-215f-45bb-bd4e-726707d5c5b6",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.lineas_transaccion": {
+      "name": "lineas_transaccion",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "transaccion_id": {
+          "name": "transaccion_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "material_id": {
+          "name": "material_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "peso_kg": {
+          "name": "peso_kg",
+          "type": "numeric(10, 3)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "precio_unitario": {
+          "name": "precio_unitario",
+          "type": "numeric(14, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tarifa": {
+          "name": "tarifa",
+          "type": "tarifa",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "origen_peso": {
+          "name": "origen_peso",
+          "type": "origen_peso",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'manual'"
+        },
+        "subtotal": {
+          "name": "subtotal",
+          "type": "numeric(14, 2)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "lineas_transaccion_transaccion_idx": {
+          "name": "lineas_transaccion_transaccion_idx",
+          "columns": [
+            {
+              "expression": "transaccion_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "lineas_transaccion_material_idx": {
+          "name": "lineas_transaccion_material_idx",
+          "columns": [
+            {
+              "expression": "material_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "lineas_transaccion_transaccion_id_transacciones_id_fk": {
+          "name": "lineas_transaccion_transaccion_id_transacciones_id_fk",
+          "tableFrom": "lineas_transaccion",
+          "tableTo": "transacciones",
+          "columnsFrom": [
+            "transaccion_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "lineas_transaccion_material_id_materiales_id_fk": {
+          "name": "lineas_transaccion_material_id_materiales_id_fk",
+          "tableFrom": "lineas_transaccion",
+          "tableTo": "materiales",
+          "columnsFrom": [
+            "material_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "lineas_transaccion_peso_positivo": {
+          "name": "lineas_transaccion_peso_positivo",
+          "value": "\"lineas_transaccion\".\"peso_kg\" > 0"
+        },
+        "lineas_transaccion_valores_no_negativos": {
+          "name": "lineas_transaccion_valores_no_negativos",
+          "value": "\"lineas_transaccion\".\"precio_unitario\" >= 0 AND \"lineas_transaccion\".\"subtotal\" >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.materiales": {
+      "name": "materiales",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "nombre": {
+          "name": "nombre",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "precio_compra_minorista": {
+          "name": "precio_compra_minorista",
+          "type": "numeric(14, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "precio_compra_mayorista": {
+          "name": "precio_compra_mayorista",
+          "type": "numeric(14, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "precio_venta": {
+          "name": "precio_venta",
+          "type": "numeric(14, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "activo": {
+          "name": "activo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "creado_en": {
+          "name": "creado_en",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "actualizado_en": {
+          "name": "actualizado_en",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "materiales_nombre_unico": {
+          "name": "materiales_nombre_unico",
+          "columns": [
+            {
+              "expression": "lower(\"nombre\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "materiales_precios_no_negativos": {
+          "name": "materiales_precios_no_negativos",
+          "value": "\"materiales\".\"precio_compra_minorista\" >= 0 AND \"materiales\".\"precio_compra_mayorista\" >= 0 AND \"materiales\".\"precio_venta\" >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.terceros": {
+      "name": "terceros",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "nombre": {
+          "name": "nombre",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "documento": {
+          "name": "documento",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "telefono": {
+          "name": "telefono",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "tipo_tercero",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "creado_en": {
+          "name": "creado_en",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "actualizado_en": {
+          "name": "actualizado_en",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.transacciones": {
+      "name": "transacciones",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "consecutivo": {
+          "name": "consecutivo",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "transacciones_consecutivo_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "tipo_transaccion",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tercero_id": {
+          "name": "tercero_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fecha": {
+          "name": "fecha",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "total": {
+          "name": "total",
+          "type": "numeric(14, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "medio_pago": {
+          "name": "medio_pago",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "estado": {
+          "name": "estado",
+          "type": "estado_transaccion",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'activa'"
+        },
+        "creado_en": {
+          "name": "creado_en",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "actualizado_en": {
+          "name": "actualizado_en",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "transacciones_fecha_idx": {
+          "name": "transacciones_fecha_idx",
+          "columns": [
+            {
+              "expression": "fecha",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "transacciones_tercero_id_terceros_id_fk": {
+          "name": "transacciones_tercero_id_terceros_id_fk",
+          "tableFrom": "transacciones",
+          "tableTo": "terceros",
+          "columnsFrom": [
+            "tercero_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "transacciones_consecutivo_unique": {
+          "name": "transacciones_consecutivo_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "consecutivo"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "transacciones_total_no_negativo": {
+          "name": "transacciones_total_no_negativo",
+          "value": "\"transacciones\".\"total\" >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.estado_transaccion": {
+      "name": "estado_transaccion",
+      "schema": "public",
+      "values": [
+        "activa",
+        "anulada"
+      ]
+    },
+    "public.origen_peso": {
+      "name": "origen_peso",
+      "schema": "public",
+      "values": [
+        "manual",
+        "bascula"
+      ]
+    },
+    "public.tarifa": {
+      "name": "tarifa",
+      "schema": "public",
+      "values": [
+        "minorista",
+        "mayorista"
+      ]
+    },
+    "public.tipo_tercero": {
+      "name": "tipo_tercero",
+      "schema": "public",
+      "values": [
+        "cliente",
+        "proveedor",
+        "ambos"
+      ]
+    },
+    "public.tipo_transaccion": {
+      "name": "tipo_transaccion",
+      "schema": "public",
+      "values": [
+        "compra",
+        "venta"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

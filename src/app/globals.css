@@ -4,6 +4,36 @@
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
+/* Colores de la marca (los mismos del ícono y el manifest). */
+@theme {
+  --color-marca-950: #172420;
+  --color-marca-900: #24342e;
+  --color-marca-800: #2f443c;
+  --color-marca-700: #3d584d;
+  --color-marca-600: #567266;
+  --color-marca-100: #e3e9e5;
+  --color-marca-50: #f1f4f2;
+  --color-oro-600: #b8892f;
+  --color-oro-500: #d7a747;
+  --color-oro-100: #f6ecd6;
+  --color-fondo: #f5f4ef;
+}
+
 body {
-  @apply bg-stone-50 font-sans text-stone-900;
+  @apply bg-fondo font-sans text-stone-900;
+}
+
+@media print {
+  @page {
+    size: letter;
+    margin: 15mm;
+  }
+
+  body {
+    @apply bg-white;
+  }
+
+  main {
+    @apply max-w-none p-0;
+  }
 }

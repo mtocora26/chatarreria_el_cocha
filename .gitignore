@@ -42,3 +42,6 @@ next-env.d.ts
 
 # plantilla de variables (sin secretos)
 !.env.example
+
+# base PostgreSQL local (npm run db:local)
+/.postgres-local

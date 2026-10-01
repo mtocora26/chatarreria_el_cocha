@@ -2,32 +2,111 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SECCIONES } from "./secciones";
+import { SECCIONES, type Seccion } from "./secciones";
 
-export function NavegacionPrincipal() {
+// Trazos simples de 24×24; se dibujan con el color del texto.
+const ICONOS: Record<Seccion["href"], React.ReactNode> = {
+  "/compras": <path d="M12 5v14M5 12h14" />,
+  "/ventas": <path d="M5 12h14M13 6l6 6-6 6" />,
+  "/inventario": (
+    <>
+      <path d="M3 7l9-4 9 4-9 4-9-4z" />
+      <path d="M3 7v10l9 4 9-4V7" />
+      <path d="M12 11v10" />
+    </>
+  ),
+  "/historial": (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 3" />
+    </>
+  ),
+  "/materiales": (
+    <>
+      <path d="M4 6h16M4 12h16M4 18h10" />
+    </>
+  ),
+};
+
+function Icono({ href }: { href: Seccion["href"] }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+      className="size-5"
+    >
+      {ICONOS[href]}
+    </svg>
+  );
+}
+
+function useActiva() {
   const pathname = usePathname();
+  return (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+}
+
+/** Navegación dentro del encabezado, para pantallas anchas. */
+export function NavegacionPrincipal() {
+  const estaActiva = useActiva();
 
   return (
-    <nav aria-label="Secciones principales">
-      <ul className="grid grid-cols-4 gap-1 sm:flex sm:gap-2">
-        {SECCIONES.map(({ href, titulo }) => {
-          const estaActiva = pathname === href || pathname.startsWith(`${href}/`);
-          return (
-            <li key={href}>
-              <Link
-                href={href}
-                aria-current={estaActiva ? "page" : undefined}
-                className={`block rounded-md px-2 py-2 text-center text-sm font-medium transition-colors sm:px-3 ${
-                  estaActiva
-                    ? "bg-amber-600 text-white"
-                    : "text-stone-700 hover:bg-stone-200 hover:text-stone-900"
+    <nav aria-label="Secciones principales" className="hidden sm:block">
+      <ul className="flex gap-1">
+        {SECCIONES.map(({ href, titulo }) => (
+          <li key={href}>
+            <Link
+              href={href}
+              aria-current={estaActiva(href) ? "page" : undefined}
+              className={`flex min-h-10 items-center rounded-lg px-3 text-sm font-medium transition-colors ${
+                estaActiva(href)
+                  ? "bg-oro-500 text-marca-950"
+                  : "text-marca-100 hover:bg-marca-800 hover:text-white"
+              }`}
+            >
+              {titulo}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
+
+/** Barra fija inferior en el teléfono: las secciones quedan al alcance del pulgar. */
+export function NavegacionInferior() {
+  const estaActiva = useActiva();
+
+  return (
+    <nav
+      aria-label="Secciones principales"
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-stone-200 bg-white pb-[env(safe-area-inset-bottom)] sm:hidden print:hidden"
+    >
+      <ul className="grid h-16 grid-cols-5">
+        {SECCIONES.map(({ href, titulo }) => (
+          <li key={href}>
+            <Link
+              href={href}
+              aria-current={estaActiva(href) ? "page" : undefined}
+              className={`flex h-full flex-col items-center justify-center gap-0.5 text-[11px] font-medium ${
+                estaActiva(href) ? "text-marca-900" : "text-stone-500"
+              }`}
+            >
+              <span
+                className={`flex h-7 w-12 items-center justify-center rounded-full ${
+                  estaActiva(href) ? "bg-oro-100 text-marca-900" : ""
                 }`}
               >
-                {titulo}
-              </Link>
-            </li>
-          );
-        })}
+                <Icono href={href} />
+              </span>
+              {titulo}
+            </Link>
+          </li>
+        ))}
       </ul>
     </nav>
   );
