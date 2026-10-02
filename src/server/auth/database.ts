@@ -1,8 +1,5 @@
-import { crearConexion, type BaseDeDatos } from "@/server/db/cliente";
-
-const globalConDb = globalThis as typeof globalThis & { dbAuth?: BaseDeDatos };
+import { obtenerDb } from "@/server/db";
 
 export function obtenerDbAuth() {
-  globalConDb.dbAuth ??= crearConexion(process.env.DATABASE_URL).db;
-  return globalConDb.dbAuth;
+  return obtenerDb();
 }
