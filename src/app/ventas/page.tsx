@@ -11,21 +11,24 @@ import { EncabezadoPagina } from "@/shared/ui/encabezado-pagina";
 import { claseEnlace } from "@/shared/ui/estilos";
 import { registrarVentaAccion } from "./acciones";
 import { esAdmin, exigirSesion } from "@/server/auth/sesion";
+import { medirTiempo } from "@/server/medir-tiempo";
 
 export const metadata: Metadata = { title: "Ventas" };
 
 export default async function PaginaVentas({ searchParams }: PageProps<"/ventas">) {
-  const sesion = await exigirSesion();
+  const sesion = await medirTiempo("ventas", "sesion", exigirSesion);
   await connection();
   const { corregir } = await searchParams;
-  const [activos, stock, recientes, original] = await Promise.all([
-    materiales.listarMaterialesActivos(),
-    operaciones.consultarStock(),
-    operaciones.listarRecientes("venta"),
-    typeof corregir === "string" && esAdmin(sesion)
-      ? operaciones.obtenerDetalle(corregir)
-      : Promise.resolve(null),
-  ]);
+  const [activos, stock, recientes, original] = await medirTiempo("ventas", "datos_total", () =>
+    Promise.all([
+      medirTiempo("ventas", "materiales_activos", () => materiales.listarMaterialesActivos()),
+      medirTiempo("ventas", "stock", () => operaciones.consultarStock()),
+      medirTiempo("ventas", "ventas_recientes", () => operaciones.listarRecientes("venta")),
+      typeof corregir === "string" && esAdmin(sesion)
+        ? medirTiempo("ventas", "detalle_correccion", () => operaciones.obtenerDetalle(corregir))
+        : Promise.resolve(null),
+    ]),
+  );
   const corrigiendo = original?.tipo === "venta" && original.estado === "activa" ? original : null;
   // Al corregir, lo vendido en la original vuelve a estar disponible para la nueva.
   for (const linea of corrigiendo?.lineas ?? []) {

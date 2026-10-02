@@ -15,6 +15,7 @@ import {
   claseTarjeta,
 } from "@/shared/ui/estilos";
 import { exigirSesion } from "@/server/auth/sesion";
+import { medirTiempo } from "@/server/medir-tiempo";
 
 export const metadata: Metadata = { title: "Historial" };
 
@@ -32,19 +33,23 @@ function enlace(filtro: Historial["filtro"], extra: Record<string, string> = {})
 }
 
 export default async function PaginaHistorial({ searchParams }: PageProps<"/historial">) {
-  await exigirSesion();
+  await medirTiempo("historial", "sesion", exigirSesion);
   await connection();
   const parametros = await searchParams;
-  const [historial, catalogo] = await Promise.all([
-    operaciones.consultarHistorial({
-      desde: texto(parametros.desde),
-      hasta: texto(parametros.hasta),
-      tipo: texto(parametros.tipo),
-      materialId: texto(parametros.materialId),
-      antesDe: texto(parametros.antesDe),
-    }),
-    materiales.listarMateriales(),
-  ]);
+  const [historial, catalogo] = await medirTiempo("historial", "datos_total", () =>
+    Promise.all([
+      medirTiempo("historial", "operaciones_y_resumen", () =>
+        operaciones.consultarHistorial({
+          desde: texto(parametros.desde),
+          hasta: texto(parametros.hasta),
+          tipo: texto(parametros.tipo),
+          materialId: texto(parametros.materialId),
+          antesDe: texto(parametros.antesDe),
+        }),
+      ),
+      medirTiempo("historial", "catalogo_materiales", () => materiales.listarMateriales()),
+    ]),
+  );
   const { filtro, resumen } = historial;
 
   const hoy = diaNegocio(new Date());
