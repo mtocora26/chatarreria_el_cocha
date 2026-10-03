@@ -10,14 +10,16 @@ export function FormularioIngreso({ destino }: { destino: string }) {
   return (
     <form action={enviar} className="grid gap-5">
       <div className="grid gap-2">
-        <label htmlFor="email" className="text-sm font-semibold text-stone-800">
-          Correo electrónico
+        <label htmlFor="usuario" className="text-sm font-semibold text-stone-800">
+          Usuario
         </label>
         <input
-          id="email"
-          name="email"
-          type="email"
+          id="usuario"
+          name="usuario"
+          type="text"
           autoComplete="username"
+          autoCapitalize="none"
+          spellCheck={false}
           required
           className="focus:border-marca-600 focus:ring-oro-500/40 min-h-12 rounded-lg border border-stone-300 bg-white px-3 text-base outline-none focus:ring-2"
         />

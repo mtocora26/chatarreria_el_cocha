@@ -20,6 +20,7 @@
     "db:local": "tsx scripts/db-local.ts",
     "db:demo": "tsx scripts/datos-demo.ts",
     "auth:crear-admin": "npx auth@latest create-admin --config ./src/server/auth.ts",
+    "auth:asignar-usuario": "tsx scripts/asignar-usuario.ts",
     "auth:crear-trabajador": "npx auth@latest create-admin --config ./src/server/auth.ts --role user --force"
   },
   "dependencies": {

@@ -32,7 +32,7 @@ La aplicación queda disponible en <http://localhost:3000>.
 
 Genera un secreto diferente para cada entorno con `openssl rand -base64 32` y guárdalo en `BETTER_AUTH_SECRET` dentro de `.env.local` o en las variables protegidas del hosting. No lo compartas ni lo subas a Git. `BETTER_AUTH_URL` debe coincidir exactamente con la URL del entorno.
 
-El acceso se realiza por correo y contraseña; el registro público está deshabilitado. Después de aplicar las migraciones, crea el primer administrador desde la terminal:
+El acceso se realiza con **usuario** y contraseña (también se acepta el correo); el registro público está deshabilitado. Después de aplicar las migraciones, crea el primer administrador desde la terminal:
 
 ```bash
 npm run auth:crear-admin -- --email correo-del-administrador --name "Nombre del administrador"
@@ -40,28 +40,37 @@ npm run auth:crear-admin -- --email correo-del-administrador --name "Nombre del 
 
 El CLI pedirá la contraseña de forma interactiva. Para agregar un segundo administrador se repite el mismo comando con el correo autorizado. No uses contraseñas reales en argumentos, documentos o Git.
 
+El usuario con el que se inicia sesión es un nombre de 3 a 30 caracteres (letras, números, punto o guion bajo; no distingue mayúsculas). Se define al crear la cuenta con `--data` y el correo queda como dato interno, que puede ser ficticio para un trabajador:
+
+```bash
+npm run auth:crear-trabajador -- --email juan@elcocha.local --name "Juan Pérez" --data '{"username":"juan"}'
+```
+
+A una cuenta que ya existe se le asigna con `npm run auth:asignar-usuario -- --email correo --usuario nombre`.
+
 La aplicación incluye una PWA instalable desde navegadores compatibles. Consultar y guardar operaciones requiere conexión a internet; no se habilita registro ni sincronización sin conexión. La app Capacitor y su publicación en tiendas no forman parte de esta versión.
 
 ## Comandos
 
-| Comando                         | Qué hace                                                                |
-| ------------------------------- | ----------------------------------------------------------------------- |
-| `npm run dev`                   | Servidor de desarrollo con recarga en caliente                          |
-| `npm run build`                 | Compilación de producción                                               |
-| `npm run start`                 | Sirve la compilación de producción                                      |
-| `npm run lint`                  | ESLint                                                                  |
-| `npm run typecheck`             | Genera los tipos de rutas de Next.js y ejecuta `tsc`                    |
-| `npm run format`                | Formatea el código con Prettier                                         |
-| `npm run format:check`          | Verifica el formato sin modificar archivos                              |
-| `npm run check`                 | Lint + tipos + formato (lo que debe pasar antes de un PR)               |
-| `npm run db:generate`           | Genera una migración SQL a partir de cambios en el esquema              |
-| `npm run db:migrate`            | Aplica las migraciones pendientes                                       |
-| `npm run db:verificar`          | Prueba escribir y leer en la base (transacción revertida)               |
-| `npm run db:local`              | Inicia PostgreSQL local en el puerto 5433 (datos en `.postgres-local/`) |
-| `npm run db:demo`               | Carga datos ficticios de demostración en una base vacía                 |
-| `npm run db:studio`             | Explorador visual de la base (Drizzle Studio)                           |
-| `npm run auth:crear-admin`      | Crea un administrador inicial por CLI; no habilita registro público     |
-| `npm run auth:crear-trabajador` | Crea un trabajador (solo compras, ventas y crear materiales) por CLI    |
+| Comando                         | Qué hace                                                                              |
+| ------------------------------- | ------------------------------------------------------------------------------------- |
+| `npm run dev`                   | Servidor de desarrollo con recarga en caliente                                        |
+| `npm run build`                 | Compilación de producción                                                             |
+| `npm run start`                 | Sirve la compilación de producción                                                    |
+| `npm run lint`                  | ESLint                                                                                |
+| `npm run typecheck`             | Genera los tipos de rutas de Next.js y ejecuta `tsc`                                  |
+| `npm run format`                | Formatea el código con Prettier                                                       |
+| `npm run format:check`          | Verifica el formato sin modificar archivos                                            |
+| `npm run check`                 | Lint + tipos + formato (lo que debe pasar antes de un PR)                             |
+| `npm run db:generate`           | Genera una migración SQL a partir de cambios en el esquema                            |
+| `npm run db:migrate`            | Aplica las migraciones pendientes                                                     |
+| `npm run db:verificar`          | Prueba escribir y leer en la base (transacción revertida)                             |
+| `npm run db:local`              | Inicia PostgreSQL local en el puerto 5433 (datos en `.postgres-local/`)               |
+| `npm run db:demo`               | Carga datos ficticios de demostración en una base vacía                               |
+| `npm run db:studio`             | Explorador visual de la base (Drizzle Studio)                                         |
+| `npm run auth:crear-admin`      | Crea un administrador inicial por CLI; no habilita registro público                   |
+| `npm run auth:asignar-usuario`  | Asigna el usuario de inicio de sesión a una cuenta existente (`--email`, `--usuario`) |
+| `npm run auth:crear-trabajador` | Crea un trabajador (solo compras, ventas y crear materiales) por CLI                  |
 
 ## Estructura
 
