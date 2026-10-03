@@ -35,7 +35,14 @@ export default async function PaginaRecibo({ params, searchParams }: PageProps<"
   const { operacion, sesion } = await cargar(id);
   const listado = RUTA_LISTADO[operacion.tipo];
   const tipo = operacion.tipo === "compra" ? "compra" : "venta";
-  const puedeCorregir = esAdmin(sesion) && operacion.estado === "activa";
+  const administrador = esAdmin(sesion);
+  const puedeCorregir = administrador && operacion.estado === "activa";
+  const volver =
+    nuevo === "1"
+      ? { href: listado, texto: `Registrar otra ${tipo}` }
+      : administrador
+        ? { href: "/historial", texto: "Ver historial" }
+        : { href: listado, texto: `Volver a ${tipo === "compra" ? "compras" : "ventas"}` };
 
   return (
     <>
@@ -54,8 +61,8 @@ export default async function PaginaRecibo({ params, searchParams }: PageProps<"
         )}
         <div className="mb-4 flex flex-wrap gap-2">
           <BotonImprimir />
-          <Link href={nuevo === "1" ? listado : "/historial"} className={claseBotonSecundario}>
-            {nuevo === "1" ? `Registrar otra ${tipo}` : "Ver historial"}
+          <Link href={volver.href} className={claseBotonSecundario}>
+            {volver.texto}
           </Link>
           {puedeCorregir && (
             <>
@@ -92,6 +99,12 @@ export default async function PaginaRecibo({ params, searchParams }: PageProps<"
             </>
           )}
         </div>
+        {!administrador && operacion.estado === "activa" && (
+          <p className="mb-4 text-sm text-stone-600">
+            ¿Hay un error en esta {tipo}? Avisa al administrador con el N.º {operacion.consecutivo}:
+            solo él puede corregirla o anularla.
+          </p>
+        )}
         {operacion.estado === "anulada" && operacion.corregidaPor && (
           <p className="mb-4 text-sm">
             <Link href={`/recibos/${operacion.corregidaPor.id}`} className="font-medium underline">

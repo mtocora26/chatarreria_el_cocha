@@ -67,9 +67,11 @@ export default async function PaginaCompras({ searchParams }: PageProps<"/compra
       <section className="mt-10">
         <div className="mb-3 flex items-baseline justify-between gap-4">
           <h2 className="text-lg font-semibold text-stone-900">Compras recientes</h2>
-          <Link href="/historial?tipo=compra" className={`${claseEnlace} text-sm`}>
-            Ver todas
-          </Link>
+          {esAdmin(sesion) && (
+            <Link href="/historial?tipo=compra" className={`${claseEnlace} text-sm`}>
+              Ver todas
+            </Link>
+          )}
         </div>
         <ListaOperaciones operaciones={recientes} />
       </section>

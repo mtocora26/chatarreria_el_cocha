@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { NavegacionInferior, NavegacionPrincipal } from "@/shared/navegacion/navegacion-principal";
 import { cerrarSesionAccion } from "./ingresar/acciones";
-import { obtenerSesion } from "@/server/auth/sesion";
+import { esAdmin, obtenerSesion } from "@/server/auth/sesion";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -56,7 +56,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             </Link>
             {sesion ? (
               <div className="flex items-center gap-2">
-                <NavegacionPrincipal />
+                <NavegacionPrincipal esAdmin={esAdmin(sesion)} />
                 <form action={cerrarSesionAccion}>
                   <button
                     type="submit"
@@ -75,7 +75,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         >
           {children}
         </main>
-        {sesion && <NavegacionInferior />}
+        {sesion && <NavegacionInferior esAdmin={esAdmin(sesion)} />}
       </body>
     </html>
   );

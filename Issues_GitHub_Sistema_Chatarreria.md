@@ -853,6 +853,65 @@ Hacer la aplicación más clara y agradable sin cambiar los flujos.
 - [ ] Contraste de texto según WCAG AA.
 ```
 
+### I27 — Rol de trabajador con permisos limitados
+
+**Milestone:** M0 — Entregable 1: piloto operativo  
+**Labels:** `feat`, `seguridad`  
+**Project:** Status `En progreso` · Prioridad `Alta` · Tamaño `M` · Etapa `M0 Entregable 1`  
+**Depende de:** I10, I13
+
+**Cuerpo del issue:**
+
+```markdown
+## Objetivo
+
+Que el negocio pueda dar acceso a trabajadores que registren compras y ventas sin ver el inventario ni poder modificar o borrar información. Los errores los corrige el administrador.
+
+## Alcance
+
+- Un trabajador es un usuario con rol `user`; el administrador conserva el rol `admin`.
+- El trabajador puede: iniciar sesión, registrar compras y ventas, ver el recibo de lo registrado, ver la lista de materiales y crear materiales nuevos (también desde la compra).
+- El trabajador no puede: ver el inventario ni el historial, editar, desactivar, reactivar o eliminar materiales, ni anular o corregir operaciones.
+- Los permisos se comprueban en el servidor (páginas y acciones); ocultar enlaces es solo una ayuda visual.
+- Crear un trabajador con un comando documentado (`npm run auth:crear-trabajador`).
+
+## Criterios de aceptación
+
+- [ ] Un trabajador no ve Inventario ni Historial en la navegación y, al abrir esas rutas, vuelve al inicio.
+- [ ] Un trabajador no puede editar, desactivar ni eliminar un material, ni por la interfaz ni invocando la acción.
+- [ ] Un trabajador no puede anular ni corregir una operación, ni por la interfaz ni invocando la acción.
+- [ ] Un trabajador registra una compra y una venta y ve su recibo, sin botones de corrección o anulación.
+- [ ] El inicio del trabajador no muestra totales ni movimientos del día.
+- [ ] El administrador conserva todo lo que ya podía hacer.
+
+## Notas técnicas
+
+La pantalla de venta muestra el stock disponible de cada material para evitar vender de más; se mantiene porque el servidor ya impide el stock negativo, y se informa al cliente.
+```
+
+### I28 — Gestionar usuarios desde la aplicación
+
+**Milestone:** M1 — Mejoras operativas  
+**Labels:** `feat`, `seguridad`, `ui`  
+**Project:** Status `Backlog` · Prioridad `Media` · Tamaño `M` · Etapa `M1 Mejoras operativas`  
+**Depende de:** I27
+
+**Cuerpo del issue:**
+
+```markdown
+## Objetivo
+
+Que el administrador cree, desactive y restablezca la contraseña de trabajadores desde la aplicación, sin usar la terminal.
+
+## Criterios de aceptación
+
+- [ ] Una pantalla exclusiva del administrador lista los usuarios y su rol.
+- [ ] El administrador crea un trabajador con nombre, correo y contraseña inicial.
+- [ ] El administrador puede desactivar a un trabajador y revocar sus sesiones.
+- [ ] El administrador no puede quitarse su propio rol ni desactivarse.
+- [ ] No existe registro público.
+```
+
 ## Resumen de dependencias y orden sugerido
 
 ### Criterio de salida de M0
@@ -871,6 +930,7 @@ M1: I09 terceros (depende de I02/I04)
     I15 recibo térmico (depende de I07)
     I22 decimales · I23 borrar material · I24 buscar/crear material
     I12 + I13 + I24 -> I25 teléfono -> I26 diseño
+    I27 rol de trabajador (M0) -> I28 gestión de usuarios
 
 M2: I17 -> I18 -> I19 (I19 también requiere I04/I05)
 
@@ -880,7 +940,7 @@ M3: I20 valida los flujos terminados -> I21 capacitación y aceptación
 ## Fuera del alcance de estos milestones
 
 - Facturación electrónica o documento POS electrónico validado por la DIAN.
-- Roles diferenciados como cajero (solo existe `admin`, que además es el único que anula operaciones).
+- Roles adicionales al administrador y al trabajador (I27); solo el administrador anula y corrige operaciones.
 - Soporte garantizado para cualquier modelo de báscula o impresión ESC/POS directa.
 - Aplicación móvil nativa o modo sin conexión.
 - Multiempresa o registro público de negocios.

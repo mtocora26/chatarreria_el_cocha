@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { materiales, type EntradaMaterial, type ErrorGuardarMaterial } from "@/modules/materiales";
 import type { EstadoFormularioMaterial } from "@/modules/materiales/ui/estado-formulario";
 import type { EstadoAccionConfirmada } from "@/shared/ui/dialogo-confirmacion";
-import { exigirSesion } from "@/server/auth/sesion";
+import { exigirAdmin, exigirSesion } from "@/server/auth/sesion";
 
 const texto = (formData: FormData, campo: string) => String(formData.get(campo) ?? "");
 
@@ -25,7 +25,9 @@ export async function guardarMaterialAccion(
   _estado: EstadoFormularioMaterial,
   formData: FormData,
 ): Promise<EstadoFormularioMaterial> {
-  await exigirSesion();
+  // Crear está abierto al trabajador; modificar uno existente es del administrador.
+  const sesion = id === null ? await exigirSesion() : await exigirAdmin();
+  if (!sesion) return { mensaje: "Solo un administrador puede modificar materiales." };
   const entrada: EntradaMaterial = {
     nombre: texto(formData, "nombre"),
     precioCompraMinorista: texto(formData, "precioCompraMinorista"),
@@ -42,7 +44,7 @@ export async function guardarMaterialAccion(
 }
 
 export async function eliminarMaterialAccion(id: string): Promise<EstadoAccionConfirmada> {
-  await exigirSesion();
+  if (!(await exigirAdmin())) return { error: "Solo un administrador puede eliminar materiales." };
   const resultado = await materiales.eliminarMaterial(id);
   if (!resultado.ok) {
     return {
@@ -61,7 +63,9 @@ export async function cambiarActivoMaterialAccion(
   id: string,
   activo: boolean,
 ): Promise<EstadoAccionConfirmada> {
-  await exigirSesion();
+  if (!(await exigirAdmin())) {
+    return { error: "Solo un administrador puede activar o desactivar materiales." };
+  }
   const resultado = await materiales.cambiarActivo(id, activo);
   if (!resultado.ok) return { error: "El material ya no existe." };
 

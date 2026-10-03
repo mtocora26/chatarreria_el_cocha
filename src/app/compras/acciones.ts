@@ -6,7 +6,7 @@ import { materiales, type Material } from "@/modules/materiales";
 import { ERROR_GENERAL, operaciones } from "@/modules/operaciones";
 import type { ResultadoNuevoMaterial } from "@/modules/operaciones/ui/dialogo-nuevo-material";
 import type { EstadoFormularioOperacion } from "@/modules/operaciones/ui/estado-formulario";
-import { esAdmin, exigirSesion } from "@/server/auth/sesion";
+import { esAdmin, exigirAdmin, exigirSesion } from "@/server/auth/sesion";
 
 export async function registrarCompraAccion(
   _estado: EstadoFormularioOperacion,
@@ -101,7 +101,9 @@ export async function crearMaterialDesdeCompraAccion(
 export async function reactivarMaterialDesdeCompraAccion(
   id: string,
 ): Promise<ResultadoNuevoMaterial> {
-  await exigirSesion();
+  if (!(await exigirAdmin())) {
+    return { error: "Este material está desactivado. Pide al administrador que lo reactive." };
+  }
   const resultado = await materiales.cambiarActivo(id, true);
   if (!resultado.ok) return { error: "El material ya no existe." };
   revalidatePath("/", "layout");

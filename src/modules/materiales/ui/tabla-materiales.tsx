@@ -5,9 +5,34 @@ import type { Material } from "../domain/material";
 
 const precio = (valor: Pesos | null) => (valor === null ? "—" : formatearCOP(valor));
 
-const COLUMNAS = "sm:grid-cols-[minmax(0,1.5fr)_repeat(3,minmax(0,1fr))_5rem]";
+const COLUMNAS_EDITAR = "sm:grid-cols-[minmax(0,1.5fr)_repeat(3,minmax(0,1fr))_5rem]";
+const COLUMNAS_LECTURA = "sm:grid-cols-[minmax(0,1.5fr)_repeat(3,minmax(0,1fr))]";
 
-export function TablaMateriales({ materiales }: { materiales: Material[] }) {
+/** La fila es un enlace a la edición solo para quien puede editar. */
+function Fila({
+  href,
+  className,
+  children,
+}: {
+  href: string | null;
+  className: string;
+  children: React.ReactNode;
+}) {
+  if (href === null) return <div className={className}>{children}</div>;
+  return (
+    <Link href={href} className={`hover:bg-marca-50 transition-colors ${className}`}>
+      {children}
+    </Link>
+  );
+}
+
+export function TablaMateriales({
+  materiales,
+  puedeEditar,
+}: {
+  materiales: Material[];
+  puedeEditar: boolean;
+}) {
   if (materiales.length === 0) {
     return (
       <p className={`${claseTarjeta} p-6 text-center text-stone-600`}>
@@ -15,6 +40,8 @@ export function TablaMateriales({ materiales }: { materiales: Material[] }) {
       </p>
     );
   }
+
+  const COLUMNAS = puedeEditar ? COLUMNAS_EDITAR : COLUMNAS_LECTURA;
 
   return (
     <div className={`${claseTarjeta} overflow-hidden`}>
@@ -26,14 +53,14 @@ export function TablaMateriales({ materiales }: { materiales: Material[] }) {
         <span className="text-right">Compra minorista</span>
         <span className="text-right">Compra mayorista</span>
         <span className="text-right">Venta</span>
-        <span />
+        {puedeEditar && <span />}
       </div>
       <ul className="divide-y divide-stone-200">
         {materiales.map((material) => (
           <li key={material.id}>
-            <Link
-              href={`/materiales/${material.id}`}
-              className={`hover:bg-marca-50 grid grid-cols-3 gap-x-4 gap-y-1 px-4 py-3 transition-colors sm:items-center ${COLUMNAS} ${material.activo ? "" : "text-stone-400"}`}
+            <Fila
+              href={puedeEditar ? `/materiales/${material.id}` : null}
+              className={`grid grid-cols-3 gap-x-4 gap-y-1 px-4 py-3 sm:items-center ${COLUMNAS} ${material.activo ? "" : "text-stone-400"}`}
             >
               <span className="col-span-3 flex items-center gap-2 font-semibold sm:col-span-1">
                 {material.nombre}
@@ -53,10 +80,12 @@ export function TablaMateriales({ materiales }: { materiales: Material[] }) {
                 <span className="block text-xs text-stone-500 sm:hidden">Venta</span>
                 {precio(material.precioVenta)}
               </span>
-              <span className="text-marca-700 hidden text-right text-sm font-medium sm:block">
-                Editar
-              </span>
-            </Link>
+              {puedeEditar && (
+                <span className="text-marca-700 hidden text-right text-sm font-medium sm:block">
+                  Editar
+                </span>
+              )}
+            </Fila>
           </li>
         ))}
       </ul>

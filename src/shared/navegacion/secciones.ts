@@ -2,6 +2,8 @@ export type Seccion = {
   href: "/compras" | "/ventas" | "/inventario" | "/historial" | "/materiales";
   titulo: string;
   descripcion: string;
+  /** El trabajador no la ve ni puede abrirla. */
+  soloAdmin?: boolean;
 };
 
 export const SECCIONES: readonly Seccion[] = [
@@ -19,11 +21,13 @@ export const SECCIONES: readonly Seccion[] = [
     href: "/inventario",
     titulo: "Inventario",
     descripcion: "Kilos disponibles de cada material.",
+    soloAdmin: true,
   },
   {
     href: "/historial",
     titulo: "Historial",
     descripcion: "Consultar, anular o corregir compras y ventas.",
+    soloAdmin: true,
   },
   {
     href: "/materiales",
@@ -31,3 +35,7 @@ export const SECCIONES: readonly Seccion[] = [
     descripcion: "Materiales y precios por kilo de compra y venta.",
   },
 ];
+
+export function seccionesPara(esAdmin: boolean): readonly Seccion[] {
+  return SECCIONES.filter((seccion) => esAdmin || !seccion.soloAdmin);
+}

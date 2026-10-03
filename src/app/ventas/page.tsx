@@ -71,9 +71,11 @@ export default async function PaginaVentas({ searchParams }: PageProps<"/ventas"
       <section className="mt-10">
         <div className="mb-3 flex items-baseline justify-between gap-4">
           <h2 className="text-lg font-semibold text-stone-900">Ventas recientes</h2>
-          <Link href="/historial?tipo=venta" className={`${claseEnlace} text-sm`}>
-            Ver todas
-          </Link>
+          {esAdmin(sesion) && (
+            <Link href="/historial?tipo=venta" className={`${claseEnlace} text-sm`}>
+              Ver todas
+            </Link>
+          )}
         </div>
         <ListaOperaciones operaciones={recientes} />
       </section>

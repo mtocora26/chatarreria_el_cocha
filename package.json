@@ -19,7 +19,8 @@
     "test:watch": "vitest",
     "db:local": "tsx scripts/db-local.ts",
     "db:demo": "tsx scripts/datos-demo.ts",
-    "auth:crear-admin": "npx auth@latest create-admin --config ./src/server/auth.ts"
+    "auth:crear-admin": "npx auth@latest create-admin --config ./src/server/auth.ts",
+    "auth:crear-trabajador": "npx auth@latest create-admin --config ./src/server/auth.ts --role user --force"
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "^1.7.6",

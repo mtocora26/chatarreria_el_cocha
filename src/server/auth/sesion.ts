@@ -18,9 +18,16 @@ export async function exigirSesion() {
 
 type Sesion = NonNullable<Awaited<ReturnType<typeof obtenerSesion>>>;
 
-/** Anular y corregir operaciones es exclusivo del administrador. */
+/** Administrador: único que anula, corrige, ve inventario e historial y edita materiales. */
 export function esAdmin(sesion: Sesion): boolean {
   return sesion.user.role === "admin";
+}
+
+/** Para páginas exclusivas del administrador: al trabajador lo devuelve al inicio. */
+export async function exigirAdminPagina() {
+  const sesion = await exigirSesion();
+  if (!esAdmin(sesion)) redirect("/");
+  return sesion;
 }
 
 /** Para server actions: devuelve la sesión solo si es de un administrador. */

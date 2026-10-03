@@ -4,18 +4,19 @@ import { operaciones } from "@/modules/operaciones";
 import { ListaOperaciones } from "@/modules/operaciones/ui/lista-operaciones";
 import { formatearCOP } from "@/shared/dominio/dinero";
 import { diaNegocio, formatearFechaLarga } from "@/shared/dominio/fecha";
-import { SECCIONES } from "@/shared/navegacion/secciones";
+import { seccionesPara } from "@/shared/navegacion/secciones";
 import { claseEnlace, claseTarjeta } from "@/shared/ui/estilos";
-import { exigirSesion } from "@/server/auth/sesion";
+import { esAdmin, exigirSesion } from "@/server/auth/sesion";
 
 export default async function Inicio() {
   const sesion = await exigirSesion();
   await connection();
+  const administrador = esAdmin(sesion);
+  // Los totales del día son solo del administrador: el trabajador no los consulta.
   const hoy = diaNegocio(new Date());
-  const { resumen, operaciones: deHoy } = await operaciones.consultarHistorial({
-    desde: hoy,
-    hasta: hoy,
-  });
+  const delDia = administrador
+    ? await operaciones.consultarHistorial({ desde: hoy, hasta: hoy })
+    : null;
 
   return (
     <>
@@ -49,48 +50,53 @@ export default async function Inicio() {
         </Link>
       </div>
 
-      <section aria-labelledby="resumen-hoy" className="mb-8">
-        <h2 id="resumen-hoy" className="mb-3 text-lg font-semibold text-stone-900">
-          Hoy
-        </h2>
-        <div className="grid grid-cols-2 gap-3">
-          <div className={`${claseTarjeta} p-4`}>
-            <p className="text-sm text-stone-500">Comprado</p>
-            <p className="mt-1 text-xl font-bold tabular-nums sm:text-2xl">
-              {formatearCOP(resumen.compras.total)}
-            </p>
-            <p className="text-xs text-stone-500">{resumen.compras.cantidad} compras</p>
-          </div>
-          <div className={`${claseTarjeta} p-4`}>
-            <p className="text-sm text-stone-500">Vendido</p>
-            <p className="mt-1 text-xl font-bold tabular-nums sm:text-2xl">
-              {formatearCOP(resumen.ventas.total)}
-            </p>
-            <p className="text-xs text-stone-500">{resumen.ventas.cantidad} ventas</p>
-          </div>
-        </div>
-      </section>
+      {delDia && (
+        <>
+          <section aria-labelledby="resumen-hoy" className="mb-8">
+            <h2 id="resumen-hoy" className="mb-3 text-lg font-semibold text-stone-900">
+              Hoy
+            </h2>
+            <div className="grid grid-cols-2 gap-3">
+              <div className={`${claseTarjeta} p-4`}>
+                <p className="text-sm text-stone-500">Comprado</p>
+                <p className="mt-1 text-xl font-bold tabular-nums sm:text-2xl">
+                  {formatearCOP(delDia.resumen.compras.total)}
+                </p>
+                <p className="text-xs text-stone-500">{delDia.resumen.compras.cantidad} compras</p>
+              </div>
+              <div className={`${claseTarjeta} p-4`}>
+                <p className="text-sm text-stone-500">Vendido</p>
+                <p className="mt-1 text-xl font-bold tabular-nums sm:text-2xl">
+                  {formatearCOP(delDia.resumen.ventas.total)}
+                </p>
+                <p className="text-xs text-stone-500">{delDia.resumen.ventas.cantidad} ventas</p>
+              </div>
+            </div>
+          </section>
 
-      <section aria-labelledby="movimientos-hoy" className="mb-8">
-        <div className="mb-3 flex items-baseline justify-between gap-4">
-          <h2 id="movimientos-hoy" className="text-lg font-semibold text-stone-900">
-            Movimientos de hoy
-          </h2>
-          <Link href="/historial" className={`${claseEnlace} text-sm`}>
-            Ver historial
-          </Link>
-        </div>
-        <ListaOperaciones
-          operaciones={deHoy.slice(0, 8)}
-          mostrarTipo
-          vacio="Todavía no hay movimientos hoy."
-        />
-      </section>
+          <section aria-labelledby="movimientos-hoy" className="mb-8">
+            <div className="mb-3 flex items-baseline justify-between gap-4">
+              <h2 id="movimientos-hoy" className="text-lg font-semibold text-stone-900">
+                Movimientos de hoy
+              </h2>
+              <Link href="/historial" className={`${claseEnlace} text-sm`}>
+                Ver historial
+              </Link>
+            </div>
+            <ListaOperaciones
+              operaciones={delDia.operaciones.slice(0, 8)}
+              mostrarTipo
+              vacio="Todavía no hay movimientos hoy."
+            />
+          </section>
+        </>
+      )}
 
       {/* En el teléfono estas secciones ya están en la barra inferior. */}
       <ul className="hidden gap-3 sm:grid sm:grid-cols-3">
-        {SECCIONES.filter(({ href }) => href !== "/compras" && href !== "/ventas").map(
-          ({ href, titulo, descripcion }) => (
+        {seccionesPara(administrador)
+          .filter(({ href }) => href !== "/compras" && href !== "/ventas")
+          .map(({ href, titulo, descripcion }) => (
             <li key={href}>
               <Link
                 href={href}
@@ -100,8 +106,7 @@ export default async function Inicio() {
                 <p className="mt-1 text-sm text-stone-600">{descripcion}</p>
               </Link>
             </li>
-          ),
-        )}
+          ))}
       </ul>
     </>
   );
