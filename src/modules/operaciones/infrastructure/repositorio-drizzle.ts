@@ -308,7 +308,9 @@ export function crearRepositorioOperaciones(obtenerDb: () => BaseDeDatos): Repos
 
     async listar(filtro, limite, antesDe) {
       const db = obtenerDb();
-      const encabezados = await db
+      // Los nombres de materiales se agregan en la misma consulta: cada consulta
+      // adicional es una ida y vuelta de red a la base de datos.
+      const filas = await db
         .select({
           id: transacciones.id,
           consecutivo: transacciones.consecutivo,
@@ -316,6 +318,14 @@ export function crearRepositorioOperaciones(obtenerDb: () => BaseDeDatos): Repos
           estado: transacciones.estado,
           fecha: transacciones.fecha,
           total: transacciones.total,
+          // Drizzle omite el nombre de la tabla en las columnas dentro de sql``: sin los
+          // nombres explícitos, "id" sería ambiguo entre la subconsulta y la externa.
+          materiales: sql<string[]>`coalesce((
+            select array_agg(distinct m.nombre order by m.nombre)
+            from lineas_transaccion l
+            inner join materiales m on m.id = l.material_id
+            where l.transaccion_id = transacciones.id
+          ), '{}')`,
         })
         .from(transacciones)
         .where(
@@ -327,28 +337,8 @@ export function crearRepositorioOperaciones(obtenerDb: () => BaseDeDatos): Repos
         // El consecutivo crece con cada registro: sirve de cursor estable aunque entren nuevas.
         .orderBy(desc(transacciones.consecutivo))
         .limit(limite);
-      if (encabezados.length === 0) return [];
 
-      const lineas = await db
-        .selectDistinct({
-          transaccionId: lineasTransaccion.transaccionId,
-          nombre: materiales.nombre,
-        })
-        .from(lineasTransaccion)
-        .innerJoin(materiales, eq(materiales.id, lineasTransaccion.materialId))
-        .where(
-          inArray(
-            lineasTransaccion.transaccionId,
-            encabezados.map((e) => e.id),
-          ),
-        )
-        .orderBy(asc(lineasTransaccion.transaccionId), asc(materiales.nombre));
-
-      return encabezados.map((encabezado) => ({
-        ...encabezado,
-        total: pesosDesdeNumeric(encabezado.total),
-        materiales: lineas.filter((l) => l.transaccionId === encabezado.id).map((l) => l.nombre),
-      }));
+      return filas.map((fila) => ({ ...fila, total: pesosDesdeNumeric(fila.total) }));
     },
 
     async resumir(filtro) {
