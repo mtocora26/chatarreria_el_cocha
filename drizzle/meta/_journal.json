@@ -43,6 +43,13 @@
       "when": 1790824249045,
       "tag": "0005_anular_operaciones",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791061099743,
+      "tag": "0006_blue_iron_fist",
+      "breakpoints": true
     }
   ]
 }

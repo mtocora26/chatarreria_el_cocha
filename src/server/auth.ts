@@ -1,7 +1,7 @@
 import { loadEnvConfig } from "@next/env";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { betterAuth } from "better-auth";
-import { admin } from "better-auth/plugins";
+import { admin, username } from "better-auth/plugins";
 import { nextCookies } from "better-auth/next-js";
 import * as schema from "@/server/db/schema";
 import { obtenerDbAuth } from "@/server/auth/database";
@@ -26,7 +26,12 @@ export const auth = betterAuth({
     disableSignUp: true,
     revokeSessionsOnPasswordReset: true,
   },
-  plugins: [admin(), nextCookies()],
+  plugins: [
+    admin(),
+    // Se inicia sesión con usuario; displayUsername se desactiva para no duplicar la columna.
+    username({ minUsernameLength: 3, maxUsernameLength: 30, displayUsername: false }),
+    nextCookies(),
+  ],
   advanced: {
     database: { generateId: "uuid" },
   },

@@ -20,6 +20,8 @@ export const authUser = pgTable("user", {
     .default(sql`gen_random_uuid()::text`),
   name: text().notNull(),
   email: text().notNull().unique(),
+  // Nombre con el que se inicia sesión; el correo queda como dato interno.
+  username: text().unique(),
   emailVerified: boolean().notNull().default(false),
   image: text(),
   role: text().notNull().default("user"),

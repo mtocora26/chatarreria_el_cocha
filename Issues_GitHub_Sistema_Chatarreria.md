@@ -912,6 +912,33 @@ Que el administrador cree, desactive y restablezca la contraseña de trabajadore
 - [ ] No existe registro público.
 ```
 
+### I29 — Iniciar sesión con usuario en lugar de correo
+
+**Milestone:** M0 — Entregable 1: piloto operativo  
+**Labels:** `feat`, `seguridad`  
+**Project:** Status `En progreso` · Prioridad `Alta` · Tamaño `S` · Etapa `M0 Entregable 1`  
+**Depende de:** I10, I27
+
+**Cuerpo del issue:**
+
+```markdown
+## Objetivo
+
+Que los trabajadores entren con un nombre de usuario corto y no con un correo, que muchos no usan o no recuerdan.
+
+## Criterios de aceptación
+
+- [ ] La pantalla de ingreso pide "Usuario" y contraseña.
+- [ ] El usuario no distingue mayúsculas y es único (3 a 30 caracteres: letras, números, punto o guion bajo).
+- [ ] El administrador existente sigue entrando con su correo hasta que se le asigne un usuario.
+- [ ] Se puede crear un trabajador con usuario y asignar uno a una cuenta existente por comando.
+- [ ] Una contraseña incorrecta o un usuario inexistente muestran el mismo mensaje genérico.
+
+## Notas técnicas
+
+Plugin `username` de Better Auth con una migración que agrega `user.username` (único). El correo sigue siendo obligatorio en la base: para un trabajador puede ser un valor interno ficticio. Aplicar la migración en producción antes de desplegar el código.
+```
+
 ## Resumen de dependencias y orden sugerido
 
 ### Criterio de salida de M0
@@ -931,6 +958,7 @@ M1: I09 terceros (depende de I02/I04)
     I22 decimales · I23 borrar material · I24 buscar/crear material
     I12 + I13 + I24 -> I25 teléfono -> I26 diseño
     I27 rol de trabajador (M0) -> I28 gestión de usuarios
+    I27 -> I29 inicio de sesión con usuario (M0)
 
 M2: I17 -> I18 -> I19 (I19 también requiere I04/I05)
 

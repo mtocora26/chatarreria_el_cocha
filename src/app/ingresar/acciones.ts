@@ -11,17 +11,26 @@ export async function ingresarAccion(
   _estado: EstadoIngreso,
   formData: FormData,
 ): Promise<EstadoIngreso> {
-  const email = String(formData.get("email") ?? "")
+  const usuario = String(formData.get("usuario") ?? "")
     .trim()
     .toLowerCase();
   const password = String(formData.get("password") ?? "");
-  if (!email || !password) return { error: "Escribe tu correo y contraseña." };
+  if (!usuario || !password) return { error: "Escribe tu usuario y contraseña." };
 
   try {
-    await auth.api.signInEmail({
-      body: { email, password, rememberMe: true },
-      headers: await headers(),
-    });
+    // Se acepta el correo además del usuario: el administrador inicial puede seguir
+    // entrando con él mientras no tenga un usuario asignado.
+    if (usuario.includes("@")) {
+      await auth.api.signInEmail({
+        body: { email: usuario, password, rememberMe: true },
+        headers: await headers(),
+      });
+    } else {
+      await auth.api.signInUsername({
+        body: { username: usuario, password, rememberMe: true },
+        headers: await headers(),
+      });
+    }
   } catch {
     return { error: "No fue posible iniciar sesión. Revisa tus datos e intenta de nuevo." };
   }
