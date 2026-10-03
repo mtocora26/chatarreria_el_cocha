@@ -1,11 +1,14 @@
 import "server-only";
+import { cache } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/server/auth";
 
-export async function obtenerSesion() {
+// cache() la resuelve una sola vez por petición: el layout y la página la
+// piden y, sin esto, cada una consultaba la base de datos por separado.
+export const obtenerSesion = cache(async () => {
   return auth.api.getSession({ headers: await headers() });
-}
+});
 
 export async function exigirSesion() {
   const sesion = await obtenerSesion();
