@@ -1,6 +1,6 @@
 # Arquitectura — Sistema de Gestión para Chatarrería
 
-**Estado:** Stack propuesto (pendiente de aprobación final)
+**Estado:** Stack propuesto; Entregable 1 reformulado como piloto operativo privado (validar alcance comercial antes de comprometer fechas)
 **Modo de desarrollo:** Asistido por IA, con revisión humana en cada Pull Request
 **Última verificación de precios/planes:** 28/09/2026
 **Relacionado con:** [Propuesta_Sistema_Chatarreria.md](Propuesta_Sistema_Chatarreria.md)
@@ -9,21 +9,21 @@
 
 ## 1. Requisitos que condicionan la arquitectura
 
-| #   | Requisito                                                   | Impacto técnico                                                     |
-| --- | ----------------------------------------------------------- | ------------------------------------------------------------------- |
-| R1  | Versión inicial usable en **2 días**                        | Stack conocido, poco código de infraestructura                      |
-| R2  | Uso desde celular y computador, sin instalar                | Aplicación web responsive (opcional PWA)                            |
-| R3  | Hosting en **planes gratuitos**                             | Vercel / Netlify / Supabase / Neon / Firebase                       |
-| R4  | 1–2 usuarios administradores                                | Autenticación simple (correo + contraseña)                          |
-| R5  | Inventario exacto y reportes diarios                        | Base de datos **relacional** (SQL) preferible                       |
-| R6  | Recibo interno imprimible (hoja o tirilla 58/80 mm)         | CSS de impresión + PDF                                              |
-| R7  | Lectura de báscula por serial/USB                           | Web Serial API (Chrome/Edge en PC) o agente local                   |
-| R8  | Exportación a Excel                                         | Generación de `.xlsx`/CSV                                           |
-| R9  | Futuro: documento POS electrónico DIAN                      | Integración vía API con proveedor tecnológico                       |
-| R10 | Los datos del prototipo no se pierden                       | Modelo de datos definitivo desde el día 1                           |
-| R11 | **Costo $0 a largo plazo**, aunque la base de ventas crezca | Postgres portátil, control de tamaño, archivado y respaldos propios |
-| R12 | Desarrollo con IA y fines de aprendizaje                    | Stack moderno, muy documentado y tipado (TypeScript)                |
-| R13 | Estructura organizacional/empresarial                       | Monolito modular, ADRs, CI, GitHub Projects, ambientes separados    |
+| #   | Requisito                                                                    | Impacto técnico                                                                           |
+| --- | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| R1  | Entregar valor temprano sin exponer datos ni perder registros                | Liberar un piloto básico cuando operación, acceso y recuperación estén verificados        |
+| R2  | Uso elegante desde celular y computador; instalación opcional                | Aplicación web responsive e instalable como PWA; no requiere app de tienda para el piloto |
+| R3  | Hosting de bajo costo, compatible con uso comercial y con datos recuperables | Confirmar proveedor, límites, disponibilidad y costo antes de publicar                    |
+| R4  | 1–2 usuarios administradores                                                 | Autenticación simple (correo + contraseña)                                                |
+| R5  | Inventario exacto y reportes diarios                                         | Base de datos **relacional** (SQL) preferible                                             |
+| R6  | Recibo interno imprimible (hoja o tirilla 58/80 mm)                          | CSS de impresión + PDF                                                                    |
+| R7  | Lectura de báscula por serial/USB                                            | Web Serial API (Chrome/Edge en PC) o agente local                                         |
+| R8  | Exportación a Excel                                                          | Generación de `.xlsx`/CSV                                                                 |
+| R9  | Futuro: documento POS electrónico DIAN                                       | Integración vía API con proveedor tecnológico                                             |
+| R10 | Los datos del prototipo no se pierden                                        | Modelo de datos definitivo desde el día 1                                                 |
+| R11 | **Costo $0 a largo plazo**, aunque la base de ventas crezca                  | Postgres portátil, control de tamaño, archivado y respaldos propios                       |
+| R12 | Desarrollo con IA y fines de aprendizaje                                     | Stack moderno, muy documentado y tipado (TypeScript)                                      |
+| R13 | Estructura organizacional/empresarial                                        | Monolito modular, ADRs, CI, GitHub Projects, ambientes separados                          |
 
 ---
 
@@ -33,7 +33,7 @@
 | -------------------------------------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------- |
 | **A. SPA + BaaS**                            | React (Vite) + Supabase directo desde el navegador                            | Muy rápido, sin backend propio                                                         | Lógica de negocio en el cliente; dependencia fuerte de Supabase | Descartada                                              |
 | **B. Full‑stack Next.js (monolito modular)** | Next.js + TypeScript con frontend y backend en el mismo proyecto + PostgreSQL | Lógica en servidor, un solo repo y despliegue, stack moderno que la IA conoce muy bien | Curva de aprendizaje media                                      | **Elegida**                                             |
-| **C. API propia + SPA**                      | React + Node/NestJS + Postgres                                                | Separación total, mucho aprendizaje de backend                                         | Doble despliegue, más código; no cabe en 2 días                 | Descartada por ahora (se puede extraer una API después) |
+| **C. API propia + SPA**                      | React + Node/NestJS + Postgres                                                | Separación total, mucho aprendizaje de backend                                         | Doble despliegue y más código para el piloto actual             | Descartada por ahora (se puede extraer una API después) |
 | **D. Monolito clásico**                      | Laravel / Django                                                              | Todo incluido                                                                          | Hosting gratuito limitado; menos alineado con el stack moderno  | Descartada                                              |
 | **E. Firebase**                              | React + Firestore                                                             | Rápido                                                                                 | NoSQL: inventario y reportes incómodos                          | Descartada                                              |
 | **F. Low‑code**                              | Google Sheets / AppSheet / Excel                                              | Inmediato                                                                              | Sin báscula, recibos ni crecimiento                             | Descartada                                              |
@@ -52,6 +52,7 @@
 | ORM y migraciones        | **Drizzle ORM + Drizzle Kit**                                                                         | SQL tipado, migraciones versionadas en Git, sin atarse a un proveedor                                     | Prisma                                                                                                 |
 | Autenticación            | **Better Auth**                                                                                       | Open source, usuarios guardados en nuestra propia BD, sin costo                                           | Supabase Auth, Clerk                                                                                   |
 | Hosting                  | **Netlify (Free)** — alternativa: Cloudflare                                                          | Plan gratuito apto para proyectos de clientes (confirmar términos al desplegar)                           | **Vercel Hobby**: sus términos lo limitan a uso personal no comercial                                  |
+| Experiencia móvil        | **PWA instalable** en Entregable 1; Capacitor solo si luego se justifica                              | Una sola aplicación web adaptable, acceso desde icono y distribución sencilla                             | App nativa separada desde el inicio: más costo de desarrollo y publicación                             |
 | Báscula                  | **Web Serial API** (Chrome/Edge en PC)                                                                | Sin instalar nada                                                                                         | Agente local Node (plan B)                                                                             |
 | Recibos                  | **HTML + CSS `@page` + `window.print()`**                                                             | Hoja carta o tirilla 58/80 mm                                                                             | ESC/POS directo (futuro)                                                                               |
 | Excel                    | **SheetJS (`xlsx`)**                                                                                  | Exporta desde el navegador                                                                                | —                                                                                                      |
@@ -60,6 +61,8 @@
 | Respaldos                | **GitHub Actions: `pg_dump` diario → almacenamiento externo gratuito** (Cloudflare R2 o Google Drive) | El plan Free de Neon solo guarda 6 h de historial                                                         | —                                                                                                      |
 
 **Principio clave — portabilidad:** todo es PostgreSQL estándar + código propio. Si un proveedor cambia precios, se migra con `pg_dump` / `pg_restore` a otro Postgres sin reescribir la aplicación.
+
+**Ruta móvil:** el Entregable 1 debe ofrecer una interfaz responsive, instalable desde el navegador como PWA en las plataformas compatibles. La PWA conserva la misma cuenta, permisos y base de datos del servicio web. Las operaciones que guardan o consultan registros requieren conexión a internet; no se promete captura ni sincronización offline. Capacitor se evaluará después si el negocio requiere distribución por tiendas o acceso a capacidades nativas que la PWA no cubra; no es parte del Entregable 1.
 
 ---
 
@@ -261,13 +264,13 @@ Cada decisión importante se documenta también como ADR en `docs/adr/NNNN-titul
 
 ### 8.3 Milestones
 
-| Milestone                | Contenido                               | Meta        |
-| ------------------------ | --------------------------------------- | ----------- |
-| **M0 — Versión inicial** | Lo mínimo para operar                   | 2 días      |
-| **M1 — Mejoras**         | Historial diario, Excel, ajustes de uso | Semana 1–2  |
-| **M2 — Báscula**         | Lectura de peso por serial              | Semana 2–3  |
-| **M3 — Entrega final**   | Pruebas, capacitación, documentación    | Semana 3    |
-| **Futuro — DIAN**        | Documento POS electrónico               | Por cotizar |
+| Milestone                               | Contenido                                                      | Meta                                        |
+| --------------------------------------- | -------------------------------------------------------------- | ------------------------------------------- |
+| **M0 — Entregable 1: piloto operativo** | Operación básica publicada y privada, con recuperación probada | Meta inicial: 30 sep 2026; validar esfuerzo |
+| **M1 — Mejoras operativas**             | Terceros, exportación, resúmenes y mejoras de uso              | Después de iniciar piloto                   |
+| **M2 — Báscula**                        | Lectura de peso por serial                                     | Semana 2–3                                  |
+| **M3 — Entrega final**                  | Pruebas, capacitación, documentación                           | Semana 3                                    |
+| **Futuro — DIAN**                       | Documento POS electrónico                                      | Por cotizar                                 |
 
 ### 8.4 Labels
 
@@ -275,21 +278,24 @@ Cada decisión importante se documenta también como ADR en `docs/adr/NNNN-titul
 
 ### 8.5 Issues iniciales
 
-**M0 — Versión inicial (2 días)**
+**M0 — Entregable 1: piloto operativo (estimación por revalidar)**
 
-1. `infra` Crear repositorio con Next.js + TypeScript, ESLint/Prettier y estructura de módulos
-2. `infra` CI en GitHub Actions (lint, typecheck, tests)
-3. `infra` Configurar Neon + Drizzle y migración del modelo inicial
-4. `feat` Autenticación con Better Auth (1–2 usuarios)
-5. `infra` Despliegue en Netlify con variables de entorno
-6. `feat` CRUD de materiales y precios
-7. `feat` Registro de compras con peso manual y cálculo automático
-8. `feat` Registro de ventas
-9. `inventario` Vista de inventario por material (kg)
-10. `recibo` Recibo interno imprimible
-11. `docs` Guía rápida de uso para el cliente
+1. `infra` Preparar aplicación, calidad y migraciones PostgreSQL
+2. `feat` Autenticación privada y alta controlada de 1–2 administradores; sin registro público
+3. `feat` Catálogo de materiales y precios
+4. `feat` Registro de compras/ventas manuales, cálculo en servidor y rechazo de stock insuficiente
+5. `inventario` Consulta de stock e historial diario
+6. `feat` Anulación trazable de operaciones para corregir errores sin borrar datos
+7. `recibo` Recibo interno imprimible en hoja normal
+8. `infra` Despliegue HTTPS privado con base persistente, entorno y rollback documentados
+9. `seguridad` Respaldo automático y restauración de prueba antes de datos reales
+10. `docs` Alta de usuarios por canal seguro y guía breve de operación/soporte
+11. `ui` PWA instalable, con icono y experiencia móvil cuidada; operaciones en línea
+12. `test` Aceptación del piloto en escritorio y teléfono real
 
-**M1 — Mejoras** 12. `infra` Respaldo diario automático (`pg_dump`) y prueba de restauración 13. `feat` Resumen diario (gastado vs. ingresado) y tabla `resumen_diario` 14. `feat` Historial con filtros por fecha 15. `feat` Exportación a Excel 16. `feat` Gestión de clientes/proveedores 17. `feat` Anulación de transacciones 18. `recibo` Formato tirilla 58/80 mm 19. `feat` Monitor de tamaño de la base de datos
+**M1 — Mejoras operativas** `feat` Gestión de clientes/proveedores · `feat` Exportación a Excel · `recibo` Formato tirilla 58/80 mm · `feat` Monitor de tamaño de la base de datos
+
+**Futuro — aplicación de tienda** Evaluar Capacitor si existe una necesidad concreta de publicar en App Store/Google Play o usar capacidades nativas no cubiertas por el navegador.
 
 **M2 — Báscula** 20. `decision` Identificar modelo, salida y protocolo de la báscula 21. `bascula` Prueba de concepto de lectura por Web Serial 22. `bascula` Botón "Tomar peso" en compras y ventas 23. `bascula` Manejo de errores y respaldo manual
 

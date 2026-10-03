@@ -1,10 +1,10 @@
-# Demostración del prototipo (M0)
+# Prueba local del prototipo (previa al Entregable 1)
 
-Guion para presentar el prototipo al cliente el 30 de septiembre de 2026. Duración estimada: 10–15 minutos.
+Esta guía solo sirve para comprobar el prototipo en desarrollo. No es la entrega al cliente ni autoriza registrar datos reales. El Entregable 1 es un piloto publicado por HTTPS, con inicio de sesión, base persistente y recuperación probada; sus criterios están en [Issues_GitHub_Sistema_Chatarreria.md](../Issues_GitHub_Sistema_Chatarreria.md).
 
 > **Datos ficticios.** Todos los materiales, precios y operaciones de la demo son inventados. No se usa información real del cliente.
 >
-> **Solo local.** El prototipo no tiene inicio de sesión todavía (llega en M1). No se publica en internet.
+> **Solo local.** Se usa una cuenta administrativa local de prueba. No se publica en internet ni se usa con información real.
 
 ## 1. Preparación (una sola vez, ~5 minutos)
 
@@ -15,10 +15,12 @@ npm install
 cp .env.example .env.local
 ```
 
-En `.env.local` deja la conexión local:
+En `.env.local` configura conexión, URL local y un secreto de desarrollo generado con `openssl rand -base64 32`:
 
 ```
 DATABASE_URL=postgresql://postgres:local@127.0.0.1:5433/postgres
+BETTER_AUTH_URL=http://localhost:3000
+BETTER_AUTH_SECRET=<secreto-local-generado>
 ```
 
 En una terminal aparte, inicia PostgreSQL local y déjala abierta:
@@ -32,11 +34,14 @@ En otra terminal, crea las tablas y carga los datos de demostración:
 ```bash
 npm run db:migrate
 npm run db:demo
+npm run auth:crear-admin -- --email demo@chatarreria.local --name "Administrador de prueba"
 ```
+
+El comando pide la contraseña en la terminal. No reutilices esa cuenta o contraseña en un entorno publicado.
 
 `db:demo` solo funciona sobre una base sin materiales. Para empezar de cero: detén `db:local` (Ctrl+C), borra la carpeta `.postgres-local/` y repite los pasos.
 
-> El mismo esquema y las mismas migraciones se usarán con Neon en M1: la base local no es una versión desechable.
+> El mismo esquema y las mismas migraciones se usarán en el entorno del piloto. La base local es solo para desarrollo y no contiene datos del cliente.
 
 ## 2. Arrancar
 
@@ -45,7 +50,7 @@ npm run build
 npm run start
 ```
 
-Abre <http://localhost:3000>. (`npm run dev` también sirve, pero la primera carga de cada página es más lenta.)
+Abre <http://localhost:3000>, inicia sesión con la cuenta local creada y recorre la demo. (`npm run dev` también sirve, pero la primera carga de cada página es más lenta.)
 
 ### Estado inicial esperado (datos de demo)
 
@@ -76,22 +81,10 @@ Abre <http://localhost:3000>. (`npm run dev` también sirve, pero la primera car
    - Plomo 25 kg: aparece _"Supera el stock"_ y el servidor la rechaza.
    - Cambiar a 15 kg, ajustar el precio a 3900 y registrar. Se abre el recibo de venta.
 7. **Inventario.** Plomo queda en 5,000 kg.
-8. **Celular.** Repetir una compra corta desde el teléfono (ver sección 4) o con el modo dispositivo del navegador (F12 → icono de celular).
-9. **Cierre.** Explicar qué llega después: inicio de sesión, despliegue, historial, anulaciones, Excel, tirilla térmica y báscula. La facturación electrónica DIAN está fuera de este alcance.
+8. **Celular.** Revisar el diseño con el modo dispositivo del navegador (F12 → icono de celular); no exponer el servidor local a redes públicas.
+9. **Cierre.** Esta prueba sigue siendo local y no equivale al piloto desplegado. Excel, terceros, tirilla térmica y báscula pueden llegar después. La facturación electrónica DIAN está fuera de este alcance.
 
-## 4. Mostrar en el celular (opcional)
-
-Con el computador y el celular en la **misma red Wi‑Fi de confianza**:
-
-```bash
-npm run start -- -H 0.0.0.0
-```
-
-En el celular abre `http://IP-DEL-COMPUTADOR:3000`. En Linux, la IP se ve con `hostname -I`.
-
-> Mientras esté así, cualquiera en esa red puede usar el prototipo, porque todavía no hay inicio de sesión. Hazlo solo en una red privada y con datos ficticios, y detén el servidor al terminar.
-
-## 5. Verificación previa
+## 4. Verificación previa
 
 Antes de la reunión, recorre el guion completo una vez:
 
@@ -100,7 +93,7 @@ Antes de la reunión, recorre el guion completo una vez:
 - [ ] Guion completo en celular o en el modo dispositivo del navegador.
 - [ ] Vista previa de impresión del recibo.
 
-## 6. Comentarios del cliente
+## 5. Comentarios del cliente
 
 Anotar durante la demo. Lo que cambie el alcance se convierte en un issue nuevo, con su estimación, antes de comprometerlo.
 

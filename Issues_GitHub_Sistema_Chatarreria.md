@@ -2,9 +2,11 @@
 
 **Fecha de planeación:** 28 de septiembre de 2026  
 **Inicio asumido:** 28 de septiembre de 2026  
-**Prototipo demostrable:** 30 de septiembre de 2026  
+**Entregable 1 — piloto operativo:** objetivo 30 de septiembre de 2026  
 **Entrega completa objetivo:** 19 de octubre de 2026  
 **Responsable sugerido:** Manuel David Castro
+
+El objetivo de M0 cambia: no se considera entregado por funcionar solo en el computador del desarrollador. M0 debe quedar publicado con acceso privado para que una chatarrería pueda empezar a registrar operaciones desde computador y teléfono, usando el navegador y sin instalar una aplicación móvil. El piloto atiende únicamente a esta chatarrería en una instancia independiente; no es un servicio multiempresa. La fecha es un objetivo sujeto a cumplir todos los criterios de seguridad, persistencia y recuperación; si no se cumplen, se presenta una demo local con datos ficticios y no se cargan datos reales.
 
 Este documento contiene los issues para crear manualmente desde GitHub Issues en VS Code. Para cada issue, copia el título, configura labels y milestone, pega el cuerpo y luego agrégalo al proyecto. Los códigos `I01`, `I02`, etc. solo sirven para referenciar dependencias en este documento; reemplázalos por los números reales de GitHub al crear los issues.
 
@@ -13,12 +15,12 @@ Este documento contiene los issues para crear manualmente desde GitHub Issues en
 1. Crea un GitHub Project llamado **Sistema de Gestión para Chatarrería**.
 2. Configura los campos del proyecto según esta tabla:
 
-| Campo     | Tipo      | Opciones                                            |
-| --------- | --------- | --------------------------------------------------- |
-| Status    | Estado    | Backlog, Por hacer, En progreso, En revisión, Hecho |
-| Prioridad | Selección | Alta, Media, Baja                                   |
-| Tamaño    | Selección | S, M, L                                             |
-| Etapa     | Selección | M0 Prototipo, M1 Operación, M2 Báscula, M3 Entrega  |
+| Campo     | Tipo      | Opciones                                                       |
+| --------- | --------- | -------------------------------------------------------------- |
+| Status    | Estado    | Backlog, Por hacer, En progreso, En revisión, Hecho            |
+| Prioridad | Selección | Alta, Media, Baja                                              |
+| Tamaño    | Selección | S, M, L                                                        |
+| Etapa     | Selección | M0 Entregable 1, M1 Mejoras operativas, M2 Báscula, M3 Entrega |
 
 3. Crea los milestones indicados más abajo y asigna sus fechas límite.
 4. Crea los labels de la lista siguiente. GitHub ya ofrece `bug` por defecto en muchos repositorios; verifica si existe antes de duplicarlo.
@@ -35,22 +37,22 @@ Un issue puede tener más de un label. Los milestones y las opciones del Project
 
 ## Milestones
 
-| Milestone                       | Fecha límite | Resultado esperado                                                                                                                                                      |
-| ------------------------------- | -----------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **M0 — Prototipo demostrable**  |  30 sep 2026 | Demo local con materiales, compras, ventas, inventario y recibo imprimible. Sin datos reales ni acceso público; los registros se guardan en PostgreSQL desde el inicio. |
-| **M1 — Operación segura**       |   9 oct 2026 | Aplicación desplegada con acceso privado, gestión diaria, reportes, exportación y respaldo probado.                                                                     |
-| **M2 — Integración de báscula** |  16 oct 2026 | Compatibilidad comprobada con el equipo real o decisión documentada de mantener el ingreso manual / usar un agente local.                                               |
-| **M3 — Entrega y capacitación** |  19 oct 2026 | Pruebas finales, revisión de seguridad, manual, capacitación y aceptación del cliente.                                                                                  |
+| Milestone                               | Fecha límite | Resultado esperado                                                                                                                                                                 |
+| --------------------------------------- | -----------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **M0 — Entregable 1: piloto operativo** |  30 sep 2026 | Aplicación publicada por HTTPS y privada para un negocio; materiales, compras, ventas, inventario, historial, anulación, recibo, base persistente y respaldo restaurado en prueba. |
+| **M1 — Mejoras operativas**             |   9 oct 2026 | Terceros, exportación, recibo térmico y mejoras de reportes/uso, priorizadas con el cliente.                                                                                       |
+| **M2 — Integración de báscula**         |  16 oct 2026 | Compatibilidad comprobada con el equipo real o decisión documentada de mantener el ingreso manual / usar un agente local.                                                          |
+| **M3 — Entrega y capacitación**         |  19 oct 2026 | Pruebas finales, revisión de seguridad, manual, capacitación y aceptación del cliente.                                                                                             |
 
-> Las fechas suponen trabajo desde el 28 de septiembre de 2026. La primera demo es un prototipo local, no un servicio desplegado sin autenticación. El despliegue accesible al cliente solo se hace después de proteger el acceso.
+> La fecha de M0 es una meta, no una autorización para publicar sin completar los criterios de salida. No se cargan registros reales hasta verificar acceso privado, base de producción y restauración del respaldo.
 
-## Issues M0 — Prototipo demostrable
+## Issues M0 — Entregable 1: piloto operativo
 
 ### I01 — Inicializar aplicación y flujo de calidad
 
-**Milestone:** M0 — Prototipo demostrable  
+**Milestone:** M0 — Entregable 1: piloto operativo  
 **Labels:** `infra`, `ui`  
-**Project:** Status `Por hacer` · Prioridad `Alta` · Tamaño `M` · Etapa `M0 Prototipo`  
+**Project:** Status `Por hacer` · Prioridad `Alta` · Tamaño `M` · Etapa `M0 Entregable 1`  
 **Depende de:** Ninguno
 
 **Cuerpo del issue:**
@@ -66,6 +68,7 @@ Crear la base ejecutable del sistema con Next.js App Router y TypeScript, manten
 - Definir una estructura inicial para rutas, componentes compartidos y módulos del negocio.
 - Agregar comandos documentados para desarrollo, lint y verificación de tipos.
 - Crear una pantalla inicial responsive con navegación a Materiales, Compras, Ventas e Inventario.
+- Preparar la base PWA: metadatos de instalación, nombre e iconos, y comportamiento de apertura adecuado en móvil; no habilitar almacenamiento/sincronización offline de operaciones.
 
 ## Criterios de aceptación
 
@@ -73,6 +76,8 @@ Crear la base ejecutable del sistema con Next.js App Router y TypeScript, manten
 - [ ] ESLint y la verificación de TypeScript terminan sin errores.
 - [ ] Las cuatro secciones principales son accesibles desde la navegación.
 - [ ] La navegación funciona en un viewport de celular y en escritorio.
+- [ ] La configuración PWA se sirve correctamente desde el despliegue HTTPS y permite instalación en al menos un navegador móvil compatible.
+- [ ] Los formularios y navegación pueden operarse con controles táctiles en una pantalla de teléfono.
 - [ ] No se incluyen secretos ni credenciales en el repositorio.
 
 ## Notas técnicas
@@ -82,9 +87,9 @@ Seguir el stack propuesto en `Arquitectura_Sistema_Chatarreria.md`. Evitar crear
 
 ### I02 — Crear esquema PostgreSQL y persistencia inicial
 
-**Milestone:** M0 — Prototipo demostrable  
+**Milestone:** M0 — Entregable 1: piloto operativo  
 **Labels:** `infra`  
-**Project:** Status `Por hacer` · Prioridad `Alta` · Tamaño `M` · Etapa `M0 Prototipo`  
+**Project:** Status `Por hacer` · Prioridad `Alta` · Tamaño `M` · Etapa `M0 Entregable 1`  
 **Depende de:** I01
 
 **Cuerpo del issue:**
@@ -112,14 +117,14 @@ Persistir los datos del prototipo en PostgreSQL con migraciones versionadas, evi
 
 ## Notas técnicas
 
-La base prevista es PostgreSQL en Neon. Durante M0 se permite conexión local; no desplegar una instancia pública sin autenticación.
+La base local es solo para desarrollo. La base productiva será PostgreSQL administrado, inicialmente Neon si se confirman proveedor, límites y condiciones vigentes. No cargar datos reales antes de verificar autenticación y restauración del respaldo.
 ```
 
 ### I03 — Gestionar materiales y tarifas
 
-**Milestone:** M0 — Prototipo demostrable  
+**Milestone:** M0 — Entregable 1: piloto operativo  
 **Labels:** `feat`, `ui`  
-**Project:** Status `Por hacer` · Prioridad `Alta` · Tamaño `M` · Etapa `M0 Prototipo`  
+**Project:** Status `Por hacer` · Prioridad `Alta` · Tamaño `M` · Etapa `M0 Entregable 1`  
 **Depende de:** I02
 
 **Cuerpo del issue:**
@@ -151,9 +156,9 @@ La interfaz debe ser operable desde celular y computador. No incluir carga masiv
 
 ### I04 — Registrar compras con peso manual
 
-**Milestone:** M0 — Prototipo demostrable  
+**Milestone:** M0 — Entregable 1: piloto operativo  
 **Labels:** `feat`, `inventario`  
-**Project:** Status `Por hacer` · Prioridad `Alta` · Tamaño `L` · Etapa `M0 Prototipo`  
+**Project:** Status `Por hacer` · Prioridad `Alta` · Tamaño `L` · Etapa `M0 Entregable 1`  
 **Depende de:** I02, I03
 
 **Cuerpo del issue:**
@@ -169,7 +174,7 @@ Registrar una compra de material con peso digitado, tarifa, precio aplicado y to
 - Ingresar peso en kilogramos y calcular subtotal y total.
 - Guardar la operación y sus líneas en una transacción de base de datos.
 - Copiar el precio unitario usado para preservar el valor histórico.
-- Permitir registrar la compra sin tercero durante el prototipo; la selección de proveedor se completa en M1.
+- Permitir registrar la compra sin tercero en el Entregable 1; asociar proveedor queda para M1.
 
 ## Criterios de aceptación
 
@@ -186,9 +191,9 @@ Validar datos también en servidor. Usar una transacción PostgreSQL para el enc
 
 ### I05 — Registrar ventas y evitar stock negativo
 
-**Milestone:** M0 — Prototipo demostrable  
+**Milestone:** M0 — Entregable 1: piloto operativo  
 **Labels:** `feat`, `inventario`  
-**Project:** Status `Por hacer` · Prioridad `Alta` · Tamaño `L` · Etapa `M0 Prototipo`  
+**Project:** Status `Por hacer` · Prioridad `Alta` · Tamaño `L` · Etapa `M0 Entregable 1`  
 **Depende de:** I04
 
 **Cuerpo del issue:**
@@ -220,10 +225,10 @@ El inventario se obtiene de compras menos ventas activas; no mantener una cifra 
 
 ### I06 — Consultar inventario actual por material
 
-**Milestone:** M0 — Prototipo demostrable  
+**Milestone:** M0 — Entregable 1: piloto operativo  
 **Labels:** `feat`, `inventario`, `ui`  
-**Project:** Status `Por hacer` · Prioridad `Alta` · Tamaño `M` · Etapa `M0 Prototipo`  
-**Depende de:** I04, I05
+**Project:** Status `Por hacer` · Prioridad `Alta` · Tamaño `M` · Etapa `M0 Entregable 1`  
+**Depende de:** I04, I05, I10
 
 **Cuerpo del issue:**
 
@@ -247,9 +252,9 @@ No crear una tabla de inventario duplicada para el prototipo sin una necesidad d
 
 ### I07 — Generar e imprimir recibo interno
 
-**Milestone:** M0 — Prototipo demostrable  
+**Milestone:** M0 — Entregable 1: piloto operativo  
 **Labels:** `feat`, `recibo`, `ui`  
-**Project:** Status `Por hacer` · Prioridad `Alta` · Tamaño `M` · Etapa `M0 Prototipo`  
+**Project:** Status `Por hacer` · Prioridad `Alta` · Tamaño `M` · Etapa `M0 Entregable 1`  
 **Depende de:** I04, I05
 
 **Cuerpo del issue:**
@@ -277,40 +282,46 @@ Mostrar un recibo interno de compra o venta y permitir imprimirlo desde el naveg
 Usar HTML, CSS de impresión y `window.print()`. El formato térmico 58/80 mm queda para M1.
 ```
 
-### I08 — Preparar demostración del prototipo
+### I08 — Aceptar el piloto operativo con el cliente
 
-**Milestone:** M0 — Prototipo demostrable  
+**Milestone:** M0 — Entregable 1: piloto operativo  
 **Labels:** `test`, `docs`  
-**Project:** Status `Por hacer` · Prioridad `Alta` · Tamaño `S` · Etapa `M0 Prototipo`  
-**Depende de:** I03, I04, I05, I06, I07
+**Project:** Status `Por hacer` · Prioridad `Alta` · Tamaño `M` · Etapa `M0 Entregable 1`  
+**Depende de:** I03, I04, I05, I06, I07, I10, I11, I12, I13, I16
 
 **Cuerpo del issue:**
 
 ```markdown
 ## Objetivo
 
-Dejar una ruta de demostración repetible para presentar el prototipo el 30 de septiembre.
+Verificar que el negocio puede iniciar trabajo con una versión publicada, privada y respaldada.
 
 ## Criterios de aceptación
 
-- [ ] Existe un procedimiento corto para configurar variables y arrancar el prototipo localmente.
-- [ ] Hay datos de demostración identificados como ficticios, sin información real del cliente.
-- [ ] Se puede demostrar crear material, registrar compra, registrar venta, consultar stock e imprimir recibo.
-- [ ] Se verifica la demo en escritorio y en un viewport móvil.
-- [ ] Se anotan pendientes y comentarios del cliente para convertirlos en issues separados si cambian el alcance.
+- [ ] El cliente inicia sesión desde su dispositivo y el segundo usuario autorizado puede acceder si se habilitó.
+- [ ] Un visitante sin sesión no puede leer ni modificar datos; no hay registro público.
+- [ ] Se crea un material, se registra una compra, se consulta inventario, se registra una venta válida y se imprime su recibo.
+- [ ] Se rechaza una venta superior al stock y se anula una operación de prueba, comprobando que el inventario se recalcula.
+- [ ] Los registros siguen disponibles después de cerrar sesión y volver a entrar desde otro dispositivo.
+- [ ] La base de producción y el respaldo/restauración de prueba se verifican antes de ingresar información real.
+- [ ] El cliente recibe URL, acceso inicial por canal seguro y una guía breve de operación y soporte.
+- [ ] Desde un teléfono real, con navegador móvil, el usuario inicia sesión, registra una compra o venta, consulta inventario y vuelve a ver el registro guardado.
+- [ ] La PWA se puede instalar desde el navegador compatible, muestra nombre e icono del negocio y abre en una presentación móvil cuidada.
+- [ ] La interfaz indica que se requiere conexión para consultar/guardar; no aparenta aceptar operaciones offline ni perder silenciosamente un registro.
+- [ ] Se verifica también en escritorio. Producción no contiene registros ficticios de demo.
 
 ## Notas técnicas
 
-No publicar el prototipo en internet sin autenticación. La base local debe usar el mismo esquema que continuará en M1.
+No marcar M0 como entregado solo por una demo local o un build exitoso. El cliente empieza a usarlo únicamente después de aprobar estos criterios.
 ```
 
-## Issues M1 — Operación segura
+## Issues M1 — Mejoras operativas
 
 ### I09 — Gestionar clientes y proveedores
 
-**Milestone:** M1 — Operación segura  
+**Milestone:** M1 — Mejoras operativas  
 **Labels:** `feat`, `ui`  
-**Project:** Status `Backlog` · Prioridad `Media` · Tamaño `M` · Etapa `M1 Operación`  
+**Project:** Status `Backlog` · Prioridad `Media` · Tamaño `M` · Etapa `M1 Mejoras operativas`  
 **Depende de:** I02, I04
 
 **Cuerpo del issue:**
@@ -336,9 +347,9 @@ Guardar terceros y asociarlos a compras y ventas.
 
 ### I10 — Implementar autenticación y proteger la aplicación
 
-**Milestone:** M1 — Operación segura  
+**Milestone:** M0 — Entregable 1: piloto operativo  
 **Labels:** `feat`, `seguridad`  
-**Project:** Status `Backlog` · Prioridad `Alta` · Tamaño `L` · Etapa `M1 Operación`  
+**Project:** Status `Por hacer` · Prioridad `Alta` · Tamaño `L` · Etapa `M0 Entregable 1`  
 **Depende de:** I02
 
 **Cuerpo del issue:**
@@ -346,14 +357,14 @@ Guardar terceros y asociarlos a compras y ventas.
 ```markdown
 ## Objetivo
 
-Restringir el acceso al sistema al propietario y, si se requiere, a un segundo administrador autorizado.
+Restringir el acceso al sistema del negocio al propietario y, si se requiere, a un segundo administrador autorizado antes de habilitar el acceso al cliente.
 
 ## Alcance
 
-- Configurar Better Auth con sesiones seguras y persistencia en PostgreSQL.
+- Confirmar integración de Better Auth con las versiones reales del proyecto; configurar sesiones seguras y persistencia en PostgreSQL.
 - Proteger todas las rutas y acciones que leen o modifican datos del negocio.
-- Definir un procedimiento controlado para crear los 1–2 usuarios iniciales; no habilitar registro público.
-- Documentar el cierre de sesión y la recuperación de acceso configurada.
+- Definir un procedimiento controlado para crear o invitar los 1–2 usuarios iniciales; no habilitar registro público ni autoinscripción.
+- Documentar inicio/cierre de sesión y recuperación de acceso.
 
 ## Criterios de aceptación
 
@@ -361,33 +372,36 @@ Restringir el acceso al sistema al propietario y, si se requiere, a un segundo a
 - [ ] Las acciones de servidor comprueban sesión antes de acceder o modificar datos.
 - [ ] El sistema no ofrece registro abierto al público.
 - [ ] La sesión se invalida al cerrar sesión.
+- [ ] Las cookies de sesión usan opciones seguras en producción y la protección se prueba en rutas y acciones de servidor.
 - [ ] Las claves y secretos se guardan en variables de entorno y no en Git.
 
 ## Notas técnicas
 
-Confirmar compatibilidad de Better Auth con la versión del framework y el adaptador PostgreSQL antes de cerrar la implementación.
+No desplegar ni cargar datos reales hasta completar todas las verificaciones de este issue.
 ```
 
 ### I11 — Desplegar la aplicación privada
 
-**Milestone:** M1 — Operación segura  
+**Milestone:** M0 — Entregable 1: piloto operativo  
 **Labels:** `infra`, `seguridad`  
-**Project:** Status `Backlog` · Prioridad `Alta` · Tamaño `M` · Etapa `M1 Operación`  
-**Depende de:** I09, I10
+**Project:** Status `Por hacer` · Prioridad `Alta` · Tamaño `L` · Etapa `M0 Entregable 1`  
+**Depende de:** I02, I03, I04, I05, I06, I07, I10, I12, I13
 
 **Cuerpo del issue:**
 
 ```markdown
 ## Objetivo
 
-Publicar la aplicación para uso del cliente con acceso autenticado y conexión segura a PostgreSQL.
+Publicar una instancia independiente para un negocio, accesible desde sus dispositivos y protegida con autenticación, conectada a una base persistente.
 
 ## Alcance
 
-- Verificar las condiciones actuales del plan del proveedor de hosting para uso comercial.
+- Confirmar un proveedor compatible con la versión actual de Next.js y autorizado para el uso comercial previsto; Netlify es preferido solo si supera esta verificación.
 - Configurar variables de entorno de producción fuera del repositorio.
 - Configurar el despliegue automático desde la rama acordada.
-- Revisar que rutas y acciones privadas no sean accesibles sin sesión.
+- Aplicar las migraciones a la base de producción y comprobar lectura/escritura.
+- Revisar que rutas y acciones privadas no sean accesibles sin sesión, y que el navegador solo reciba datos autorizados.
+- Configurar URL HTTPS, procedimiento de rollback y responsable del servicio.
 
 ## Criterios de aceptación
 
@@ -395,18 +409,20 @@ Publicar la aplicación para uso del cliente con acceso autenticado y conexión 
 - [ ] Las operaciones de escritura apuntan a la base de producción correcta.
 - [ ] Una sesión cerrada no puede consultar ni modificar datos.
 - [ ] Las credenciales de producción no aparecen en el bundle del navegador ni en Git.
+- [ ] Cada negocio del piloto tiene una instancia y base independientes; no se mezclan datos de clientes distintos.
+- [ ] Antes de habilitar al cliente, existe respaldo verificado y restauración probada en una base no productiva.
 - [ ] Se documenta cómo desplegar una versión anterior o detener el despliegue ante un incidente.
 
 ## Notas técnicas
 
-La arquitectura propone Netlify y Neon. Verificar en el momento del despliegue límites, condiciones comerciales y compatibilidad de Next.js; si no cumplen, registrar decisión y alternativa antes de cambiar.
+La arquitectura propone Netlify y Neon, pero son opciones por confirmar, no dependencias inamovibles. Si no son compatibles o no cumplen las condiciones comerciales, registrar proveedor alternativo y costo antes de abrir el servicio.
 ```
 
 ### I12 — Consultar historial y resumen diario
 
-**Milestone:** M1 — Operación segura  
+**Milestone:** M0 — Entregable 1: piloto operativo  
 **Labels:** `feat`, `ui`  
-**Project:** Status `Backlog` · Prioridad `Alta` · Tamaño `M` · Etapa `M1 Operación`  
+**Project:** Status `Por hacer` · Prioridad `Alta` · Tamaño `M` · Etapa `M0 Entregable 1`  
 **Depende de:** I04, I05
 
 **Cuerpo del issue:**
@@ -414,11 +430,11 @@ La arquitectura propone Netlify y Neon. Verificar en el momento del despliegue l
 ```markdown
 ## Objetivo
 
-Consultar operaciones por fecha y resumir compras frente a ventas para el día seleccionado.
+Consultar operaciones guardadas para que el negocio pueda revisar sus registros diarios.
 
 ## Alcance
 
-- Mostrar fecha, consecutivo, tipo, tercero, total y estado.
+- Mostrar fecha, consecutivo, tipo, materiales/líneas, peso, total y estado.
 - Filtrar por fecha o rango de fechas y por tipo de operación.
 - Mostrar total comprado, total vendido y cantidad de operaciones para el período.
 
@@ -428,14 +444,15 @@ Consultar operaciones por fecha y resumir compras frente a ventas para el día s
 - [ ] Los totales excluyen operaciones anuladas.
 - [ ] Los importes se presentan en COP y las fechas usan la zona horaria definida para el negocio.
 - [ ] Al abrir una operación se pueden consultar sus líneas y recibo.
+- [ ] Solo usuarios autenticados del negocio pueden consultar el historial.
 ```
 
 ### I13 — Anular operaciones con trazabilidad
 
-**Milestone:** M1 — Operación segura  
+**Milestone:** M0 — Entregable 1: piloto operativo  
 **Labels:** `feat`, `inventario`  
-**Project:** Status `Backlog` · Prioridad `Alta` · Tamaño `M` · Etapa `M1 Operación`  
-**Depende de:** I04, I05, I06, I12
+**Project:** Status `Por hacer` · Prioridad `Alta` · Tamaño `M` · Etapa `M0 Entregable 1`  
+**Depende de:** I04, I05, I06, I10, I12
 
 **Cuerpo del issue:**
 
@@ -452,17 +469,23 @@ Corregir operaciones por medio de anulación, conservando su registro y ajustand
 - [ ] Historial y resumen identifican la operación como anulada y no la suman en totales activos.
 - [ ] No se puede anular dos veces de forma que se aplique dos veces el ajuste.
 - [ ] La operación sigue disponible para auditoría con fecha y estado.
+- [ ] Solo un usuario con rol `admin` puede anular; se conservan fecha, usuario y motivo (obligatorio).
+- [ ] Anular una compra se rechaza si deja stock negativo (el material ya se vendió), también con usuarios concurrentes.
+- [ ] La acción **Corregir** anula la operación y abre el formulario de compra o venta prellenado con sus líneas.
 
 ## Notas técnicas
 
-Definir y guardar el usuario que anuló la operación si la autenticación ya provee esa información.
+- Migración: `anuladaEn`, `anuladaPor` (referencia a `user`) y `motivoAnulacion` en `transacciones`.
+- Anulación idempotente: `UPDATE … WHERE id = $1 AND estado = 'activa' RETURNING`; cero filas = ya anulada.
+- Anular una compra reduce stock: tomar el mismo bloqueo `FOR UPDATE` sobre materiales que `guardarVenta` y verificar stock antes de confirmar.
+- La autorización por rol se valida en el servidor (server action), no solo ocultando el botón.
 ```
 
 ### I14 — Exportar datos a Excel
 
-**Milestone:** M1 — Operación segura  
+**Milestone:** M1 — Mejoras operativas  
 **Labels:** `feat`  
-**Project:** Status `Backlog` · Prioridad `Media` · Tamaño `M` · Etapa `M1 Operación`  
+**Project:** Status `Backlog` · Prioridad `Media` · Tamaño `M` · Etapa `M1 Mejoras operativas`  
 **Depende de:** I06, I12
 
 **Cuerpo del issue:**
@@ -492,9 +515,9 @@ Usar CSV si `.xlsx` añade complejidad innecesaria; cumplir el requisito funcion
 
 ### I15 — Preparar recibo para impresora térmica
 
-**Milestone:** M1 — Operación segura  
+**Milestone:** M1 — Mejoras operativas  
 **Labels:** `feat`, `recibo`  
-**Project:** Status `Backlog` · Prioridad `Media` · Tamaño `M` · Etapa `M1 Operación`  
+**Project:** Status `Backlog` · Prioridad `Media` · Tamaño `M` · Etapa `M1 Mejoras operativas`  
 **Depende de:** I07
 
 **Cuerpo del issue:**
@@ -518,36 +541,38 @@ Usar CSS de impresión y probar con el modelo disponible. La impresión directa 
 
 ### I16 — Automatizar respaldo y probar restauración
 
-**Milestone:** M1 — Operación segura  
+**Milestone:** M0 — Entregable 1: piloto operativo  
 **Labels:** `infra`, `seguridad`, `test`  
-**Project:** Status `Backlog` · Prioridad `Alta` · Tamaño `M` · Etapa `M1 Operación`  
-**Depende de:** I11
+**Project:** Status `Por hacer` · Prioridad `Alta` · Tamaño `M` · Etapa `M0 Entregable 1`  
+**Depende de:** I02, I11
 
 **Cuerpo del issue:**
 
 ```markdown
 ## Objetivo
 
-Crear una copia recuperable de la base de datos de producción y demostrar que se puede restaurar.
+Proteger los registros reales del piloto con copias de seguridad y comprobar la recuperación antes de habilitar el servicio.
 
 ## Alcance
 
-- Automatizar `pg_dump` con una frecuencia diaria compatible con el proveedor.
+- Configurar `pg_dump` diario o un mecanismo administrado equivalente, compatible con el proveedor y con retención acordada.
 - Guardar la copia cifrada o en un destino con acceso restringido y retención definida.
 - Evitar imprimir secretos en logs de GitHub Actions.
-- Documentar y ejecutar una restauración en una base no productiva.
+- Probar generación y restauración con datos ficticios en una base no productiva antes de abrir el piloto.
+- Dejar programado el respaldo de producción antes de que el cliente empiece a registrar operaciones reales; verificar la primera copia y repetir una restauración periódicamente en una base no productiva.
 
 ## Criterios de aceptación
 
-- [ ] Se completa una copia de seguridad y se verifica su resultado.
-- [ ] Una restauración de prueba recupera materiales y transacciones de muestra.
+- [ ] Una copia de prueba se genera y restaura correctamente en un entorno no productivo.
+- [ ] El respaldo de producción queda programado y su primera ejecución exitosa se comprueba antes de habilitar registros reales.
+- [ ] La restauración se prueba en una base separada; nunca se ensaya sobrescribiendo producción.
 - [ ] Los secretos están en GitHub Secrets y no en el workflow.
 - [ ] Se documentan retención, ubicación, responsable y pasos de restauración.
 - [ ] Se define cómo alertar si el respaldo falla.
 
 ## Notas técnicas
 
-No considerar suficiente el historial de restauración del plan gratuito. Confirmar cuotas y costos del destino externo antes de activarlo.
+El historial del proveedor por sí solo no cuenta como respaldo verificado. Confirmar cuotas, costo, retención y responsable antes de habilitar el piloto.
 ```
 
 ## Issues M2 — Integración de báscula
@@ -698,19 +723,154 @@ Entregar al cliente instrucciones operativas y realizar una capacitación breve 
 - [ ] Quedan registrados los pendientes fuera del alcance, incluido DIAN, y cualquier aceptación acordada.
 ```
 
+## Issues M1 — Ajustes solicitados en el piloto (30 sep 2026)
+
+### I22 — Mostrar el inventario con un decimal
+
+**Milestone:** M1 — Mejoras operativas  
+**Labels:** `ui`, `inventario`  
+**Project:** Status `Por hacer` · Prioridad `Alta` · Tamaño `S` · Etapa `M1 Mejoras operativas`  
+**Depende de:** I06
+
+**Cuerpo del issue:**
+
+```markdown
+## Objetivo
+
+Leer el inventario sin ruido: mostrar los kilos con un solo decimal en lugar de tres.
+
+## Criterios de aceptación
+
+- [ ] El inventario muestra a lo sumo un decimal y sin ceros sobrantes (`12 kg`, `12,5 kg`).
+- [ ] Un stock entre 1 g y 49 g se muestra como `< 0,1 kg`, nunca como `0 kg`.
+- [ ] Recibos y mensajes de stock insuficiente conservan el peso exacto.
+- [ ] Pruebas para 0 g, 40 g, 50 g, 1.000 g y 12.549 g.
+
+## Notas técnicas
+
+Solo cambia la presentación: la base sigue guardando gramos exactos. Crear un formateador nuevo en lugar de modificar `formatearKg`, que usan recibos y errores.
+```
+
+### I23 — Eliminar o desactivar un material
+
+**Milestone:** M1 — Mejoras operativas  
+**Labels:** `feat`, `ui`  
+**Project:** Status `Por hacer` · Prioridad `Media` · Tamaño `S` · Etapa `M1 Mejoras operativas`  
+**Depende de:** I03
+
+**Cuerpo del issue:**
+
+```markdown
+## Objetivo
+
+Quitar del catálogo materiales creados por error sin romper recibos anteriores.
+
+## Criterios de aceptación
+
+- [ ] Un material sin movimientos se elimina tras confirmación.
+- [ ] Un material con movimientos no se elimina; se ofrece desactivarlo.
+- [ ] Si un material con stock mayor que cero se va a desactivar, se advierte antes.
+- [ ] Los recibos existentes siguen mostrando el nombre del material.
+
+## Notas técnicas
+
+`lineas_transaccion.materialId` usa `onDelete: restrict`. Verificar movimientos dentro de una transacción y además traducir el error `23503` por si una compra concurrente usa el material.
+```
+
+### I24 — Buscar materiales y crearlos desde la compra
+
+**Milestone:** M1 — Mejoras operativas  
+**Labels:** `feat`, `ui`  
+**Project:** Status `Por hacer` · Prioridad `Media` · Tamaño `M` · Etapa `M1 Mejoras operativas`  
+**Depende de:** I03, I04, I05
+
+**Cuerpo del issue:**
+
+```markdown
+## Objetivo
+
+Elegir el material escribiendo su nombre y, en compras, crearlo en el momento si no existe.
+
+## Criterios de aceptación
+
+- [ ] La búsqueda ignora mayúsculas y tildes.
+- [ ] En compras, si no hay coincidencias se ofrece «Crear "texto"» con nombre y precio de compra; queda seleccionado en la línea.
+- [ ] En ventas solo se busca; no se crean materiales (no tendrían stock).
+- [ ] Si el nombre coincide con un material inactivo, se ofrece reactivarlo en lugar de mostrar un error de duplicado.
+- [ ] Crear un material no borra las demás líneas del formulario.
+- [ ] Se puede operar solo con teclado y funciona con el teclado táctil del teléfono.
+
+## Notas técnicas
+
+Combobox accesible (patrón ARIA). La creación reutiliza `materiales.guardarMaterial` para conservar la misma validación.
+```
+
+### I25 — Adaptar la interfaz a teléfono
+
+**Milestone:** M1 — Mejoras operativas  
+**Labels:** `ui`  
+**Project:** Status `Backlog` · Prioridad `Media` · Tamaño `M` · Etapa `M1 Mejoras operativas`  
+**Depende de:** I12, I13, I24
+
+**Cuerpo del issue:**
+
+```markdown
+## Objetivo
+
+Usar la aplicación cómodamente en el teléfono del negocio.
+
+## Criterios de aceptación
+
+- [ ] Sin desplazamiento horizontal de la página en 360, 390, 768 y 1280 px.
+- [ ] Las tablas (recientes, materiales, historial) se muestran como tarjetas en pantallas pequeñas.
+- [ ] Las líneas de compra/venta se apilan en teléfono; total y botón de registrar quedan visibles abajo.
+- [ ] Botones y áreas táctiles de al menos 44 px.
+```
+
+### I26 — Mejorar el diseño visual
+
+**Milestone:** M1 — Mejoras operativas  
+**Labels:** `ui`  
+**Project:** Status `Backlog` · Prioridad `Baja` · Tamaño `M` · Etapa `M1 Mejoras operativas`  
+**Depende de:** I25
+
+**Cuerpo del issue:**
+
+```markdown
+## Objetivo
+
+Hacer la aplicación más clara y agradable sin cambiar los flujos.
+
+## Alcance
+
+- Inicio con resumen del día (comprado, vendido, materiales con poco stock).
+- Confirmación visible al guardar.
+- Jerarquía visual y colores definidos en un solo lugar.
+
+## Criterios de aceptación
+
+- [ ] El cliente aprueba la propuesta con referencias o capturas antes de implementarla.
+- [ ] Contraste de texto según WCAG AA.
+```
+
 ## Resumen de dependencias y orden sugerido
 
-```text
-M0: I01 -> I02 -> I03 -> I04 -> I05 -> I06
-                              \-> I07
-     I08 valida la demo de I03-I07
+### Criterio de salida de M0
 
-M1: I09 depende de I02/I04
-    I10 depende de I02 -> I11 depende de I09/I10
-    I12 depende de I04/I05 -> I13 depende de I04-I06/I12
-    I14 depende de I06/I12
-    I15 depende de I07
-    I16 depende de I11
+M0 se acepta cuando I01–I08, I10–I13 e I16 están completos y verificados en el entorno publicado. La app debe tener autenticación antes de exponer datos; migraciones, lectura/escritura y restauración deben probarse antes de cargar datos reales. El objetivo es iniciar una operación sencilla, no completar todos los reportes ni integraciones.
+
+```text
+M0: I01 -> I02 -> I03 -> I04 -> I05 -> I06 -> I07
+    I10 autenticación -> I11 despliegue privado con acceso restringido
+    I11 -> I16 respaldo/restauración en base no productiva
+    I12 historial -> I13 anulación
+    I08 acepta acceso, registro, consulta, corrección y recuperación; solo entonces se habilita al cliente
+
+M1: I09 terceros (depende de I02/I04)
+    I14 exportación (depende de I06/I12)
+    I15 recibo térmico (depende de I07)
+    I22 decimales · I23 borrar material · I24 buscar/crear material
+    I12 + I13 + I24 -> I25 teléfono -> I26 diseño
 
 M2: I17 -> I18 -> I19 (I19 también requiere I04/I05)
 
@@ -720,7 +880,7 @@ M3: I20 valida los flujos terminados -> I21 capacitación y aceptación
 ## Fuera del alcance de estos milestones
 
 - Facturación electrónica o documento POS electrónico validado por la DIAN.
-- Roles diferenciados como cajero y administrador.
+- Roles diferenciados como cajero (solo existe `admin`, que además es el único que anula operaciones).
 - Soporte garantizado para cualquier modelo de báscula o impresión ESC/POS directa.
 - Aplicación móvil nativa o modo sin conexión.
 - Multiempresa o registro público de negocios.

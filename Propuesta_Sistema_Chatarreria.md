@@ -5,6 +5,8 @@
 **Cliente:** Jesús Alberto Pacheco
 **Desarrollador:** Manuel David Castro
 
+> **Ajuste de alcance propuesto — Entregable 1:** La primera entrega se plantea como un piloto operativo remoto, no como una demo local. Este ajuste requiere confirmación escrita del cliente sobre alcance, fecha y condiciones comerciales antes de considerarse parte del acuerdo firmado.
+
 ---
 
 ## 1. Resumen Ejecutivo
@@ -55,11 +57,12 @@ Esta propuesta presenta el desarrollo de un **sistema digital de gestión** para
 
 ### 2.8 Acceso desde Cualquier Dispositivo
 
-- Aplicación web optimizada para usarse desde el navegador del celular o un computador, sin necesidad de instalar nada desde una tienda de aplicaciones.
+- Aplicación web responsive y PWA instalable desde el navegador compatible, con experiencia móvil cuidada, icono de acceso y pruebas de inicio de sesión y registro/consulta desde celular y computador. No requiere descargarla de una tienda para el Entregable 1.
 
 ### 2.9 Usuarios
 
 - Acceso para 1 o 2 usuarios administradores (por ejemplo, el propietario y un encargado de confianza).
+- Las cuentas se crean o invitan de forma controlada; no habrá registro público. Ambos administradores tienen los mismos permisos en esta versión.
 
 ### 2.10 Conexión con Báscula Digital
 
@@ -85,7 +88,7 @@ Para que el alcance quede claro desde el inicio:
 
 El sistema estará disponible en la nube, sin necesidad de un servidor propio ni instalaciones complicadas. Se podrá usar desde cualquier celular o computador con conexión a internet, simplemente entrando desde el navegador.
 
-> El servicio inicial funciona sobre planes gratuitos de almacenamiento en la nube, adecuados para el volumen de uso de un negocio pequeño como este.
+> El proveedor y el plan se confirmarán antes de publicar, verificando compatibilidad, uso comercial, límites y costo vigente. Un nivel gratuito puede cambiar sus condiciones o límites y no equivale a una garantía de disponibilidad; cualquier costo recurrente necesario se informa y acuerda antes de habilitarlo.
 
 ---
 
@@ -111,13 +114,18 @@ El sistema estará disponible en la nube, sin necesidad de un servidor propio ni
 
 ## 7. Tiempo Estimado de Entrega
 
-El sistema se entregará por etapas para que el negocio pueda empezar a usarlo de inmediato. Todo lo que se registre desde la primera versión **queda guardado** y se conserva en las siguientes.
+El sistema se entregará por etapas para que el negocio pueda empezar a usarlo antes de completar las mejoras. El Entregable 1 solo se habilita para registros reales después de completar acceso privado, despliegue, persistencia y prueba de restauración. La meta inicial del 30 de septiembre de 2026 debe revalidarse, porque el alcance ahora incluye publicación y controles que antes estaban previstos para una etapa posterior. Todo lo registrado en el piloto debe conservarse en las siguientes versiones.
 
-| Etapa               | Tiempo | Actividad                                                                                                                    |
-| ------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------- |
-| **Versión inicial** | 2 días | Catálogo de materiales y precios, registro de compras y ventas (peso manual), inventario básico y recibo interno imprimible. |
-| **Semana 1–2**      |        | Historial y resumen diario, exportación a Excel, mejoras según el uso real del negocio.                                      |
-| **Semana 2–3**      |        | Conexión con la báscula (pruebas con el equipo real), ajustes finales, capacitación y entrega final.                         |
+| Etapa                               | Actividad                                                                                                                                                                                                                                                                                                                                                                               |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Entregable 1 — piloto operativo** | Aplicación publicada por HTTPS y privada para 1–2 administradores; experiencia responsive e instalable como PWA; materiales y precios; compras y ventas con peso manual; cálculo e inventario; historial consultable; anulación trazable; recibo interno imprimible en hoja normal; base PostgreSQL persistente; respaldo automático y restauración de prueba; guía breve para iniciar. |
+| **Mejoras operativas**              | Gestión de clientes/proveedores, exportación a Excel, resumen diario ampliado, tirilla térmica y ajustes priorizados con el uso real.                                                                                                                                                                                                                                                   |
+| **Integración de báscula**          | Identificación y pruebas con el equipo real; implementación solo si el modelo y protocolo son compatibles.                                                                                                                                                                                                                                                                              |
+| **Cierre y capacitación**           | Pruebas finales, capacitación, documentación y aceptación de entrega.                                                                                                                                                                                                                                                                                                                   |
+
+**Límite del piloto:** el despliegue inicial atiende únicamente a la chatarrería del cliente, en una instancia independiente, accesible desde computador y celular por navegador. La PWA facilita instalar un icono y abrirla como aplicación; para consultar y guardar registros necesita internet y no incluye operación offline. Una app empaquetada con Capacitor y su publicación en tiendas se evaluaría como fase posterior si el negocio la necesita.
+
+**No se inicia uso con datos reales** si falta cualquiera de estos elementos: HTTPS, autenticación sin auto-registro público, base de producción migrada y verificada, autorización en rutas y acciones de servidor, y copia restaurada de prueba. Si la meta de fecha no permite cumplirlos, se mueve la fecha del piloto; no se sustituye por un acceso público sin protección.
 
 ---
 
