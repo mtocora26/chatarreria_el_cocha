@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SECCIONES, type Seccion } from "./secciones";
+import { seccionesPara, type Seccion } from "./secciones";
 
 // Trazos simples de 24×24; se dibujan con el color del texto.
 const ICONOS: Record<Seccion["href"], React.ReactNode> = {
@@ -51,13 +51,13 @@ function useActiva() {
 }
 
 /** Navegación dentro del encabezado, para pantallas anchas. */
-export function NavegacionPrincipal() {
+export function NavegacionPrincipal({ esAdmin }: { esAdmin: boolean }) {
   const estaActiva = useActiva();
 
   return (
     <nav aria-label="Secciones principales" className="hidden sm:block">
       <ul className="flex gap-1">
-        {SECCIONES.map(({ href, titulo }) => (
+        {seccionesPara(esAdmin).map(({ href, titulo }) => (
           <li key={href}>
             <Link
               href={href}
@@ -78,16 +78,20 @@ export function NavegacionPrincipal() {
 }
 
 /** Barra fija inferior en el teléfono: las secciones quedan al alcance del pulgar. */
-export function NavegacionInferior() {
+export function NavegacionInferior({ esAdmin }: { esAdmin: boolean }) {
   const estaActiva = useActiva();
+  const secciones = seccionesPara(esAdmin);
 
   return (
     <nav
       aria-label="Secciones principales"
       className="fixed inset-x-0 bottom-0 z-30 border-t border-stone-200 bg-white pb-[env(safe-area-inset-bottom)] sm:hidden print:hidden"
     >
-      <ul className="grid h-16 grid-cols-5">
-        {SECCIONES.map(({ href, titulo }) => (
+      <ul
+        className="grid h-16"
+        style={{ gridTemplateColumns: `repeat(${secciones.length}, minmax(0, 1fr))` }}
+      >
+        {secciones.map(({ href, titulo }) => (
           <li key={href}>
             <Link
               href={href}

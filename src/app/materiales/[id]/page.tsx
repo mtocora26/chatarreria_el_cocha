@@ -16,12 +16,12 @@ import {
   eliminarMaterialAccion,
   guardarMaterialAccion,
 } from "../acciones";
-import { exigirSesion } from "@/server/auth/sesion";
+import { exigirAdminPagina } from "@/server/auth/sesion";
 
 export const metadata: Metadata = { title: "Editar material" };
 
 export default async function PaginaEditarMaterial({ params }: PageProps<"/materiales/[id]">) {
-  await exigirSesion();
+  await exigirAdminPagina();
   const { id } = await params;
   const material = await materiales.obtenerMaterial(id);
   if (!material) notFound();

@@ -14,7 +14,7 @@ import {
   claseInput,
   claseTarjeta,
 } from "@/shared/ui/estilos";
-import { exigirSesion } from "@/server/auth/sesion";
+import { exigirAdminPagina } from "@/server/auth/sesion";
 import { medirTiempo } from "@/server/medir-tiempo";
 
 export const metadata: Metadata = { title: "Historial" };
@@ -33,7 +33,7 @@ function enlace(filtro: Historial["filtro"], extra: Record<string, string> = {})
 }
 
 export default async function PaginaHistorial({ searchParams }: PageProps<"/historial">) {
-  await medirTiempo("historial", "sesion", exigirSesion);
+  await medirTiempo("historial", "sesion", exigirAdminPagina);
   await connection();
   const parametros = await searchParams;
   const [historial, catalogo] = await medirTiempo("historial", "datos_total", () =>

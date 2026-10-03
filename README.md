@@ -44,23 +44,24 @@ La aplicación incluye una PWA instalable desde navegadores compatibles. Consult
 
 ## Comandos
 
-| Comando                    | Qué hace                                                                |
-| -------------------------- | ----------------------------------------------------------------------- |
-| `npm run dev`              | Servidor de desarrollo con recarga en caliente                          |
-| `npm run build`            | Compilación de producción                                               |
-| `npm run start`            | Sirve la compilación de producción                                      |
-| `npm run lint`             | ESLint                                                                  |
-| `npm run typecheck`        | Genera los tipos de rutas de Next.js y ejecuta `tsc`                    |
-| `npm run format`           | Formatea el código con Prettier                                         |
-| `npm run format:check`     | Verifica el formato sin modificar archivos                              |
-| `npm run check`            | Lint + tipos + formato (lo que debe pasar antes de un PR)               |
-| `npm run db:generate`      | Genera una migración SQL a partir de cambios en el esquema              |
-| `npm run db:migrate`       | Aplica las migraciones pendientes                                       |
-| `npm run db:verificar`     | Prueba escribir y leer en la base (transacción revertida)               |
-| `npm run db:local`         | Inicia PostgreSQL local en el puerto 5433 (datos en `.postgres-local/`) |
-| `npm run db:demo`          | Carga datos ficticios de demostración en una base vacía                 |
-| `npm run db:studio`        | Explorador visual de la base (Drizzle Studio)                           |
-| `npm run auth:crear-admin` | Crea un administrador inicial por CLI; no habilita registro público     |
+| Comando                         | Qué hace                                                                |
+| ------------------------------- | ----------------------------------------------------------------------- |
+| `npm run dev`                   | Servidor de desarrollo con recarga en caliente                          |
+| `npm run build`                 | Compilación de producción                                               |
+| `npm run start`                 | Sirve la compilación de producción                                      |
+| `npm run lint`                  | ESLint                                                                  |
+| `npm run typecheck`             | Genera los tipos de rutas de Next.js y ejecuta `tsc`                    |
+| `npm run format`                | Formatea el código con Prettier                                         |
+| `npm run format:check`          | Verifica el formato sin modificar archivos                              |
+| `npm run check`                 | Lint + tipos + formato (lo que debe pasar antes de un PR)               |
+| `npm run db:generate`           | Genera una migración SQL a partir de cambios en el esquema              |
+| `npm run db:migrate`            | Aplica las migraciones pendientes                                       |
+| `npm run db:verificar`          | Prueba escribir y leer en la base (transacción revertida)               |
+| `npm run db:local`              | Inicia PostgreSQL local en el puerto 5433 (datos en `.postgres-local/`) |
+| `npm run db:demo`               | Carga datos ficticios de demostración en una base vacía                 |
+| `npm run db:studio`             | Explorador visual de la base (Drizzle Studio)                           |
+| `npm run auth:crear-admin`      | Crea un administrador inicial por CLI; no habilita registro público     |
+| `npm run auth:crear-trabajador` | Crea un trabajador (solo compras, ventas y crear materiales) por CLI    |
 
 ## Estructura
 
