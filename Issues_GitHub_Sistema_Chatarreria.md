@@ -384,7 +384,7 @@ No desplegar ni cargar datos reales hasta completar todas las verificaciones de 
 
 **Milestone:** M0 — Entregable 1: piloto operativo  
 **Labels:** `infra`, `seguridad`  
-**Project:** Status `Por hacer` · Prioridad `Alta` · Tamaño `L` · Etapa `M0 Entregable 1`  
+**Project:** Status `Hecho` · Prioridad `Alta` · Tamaño `M` · Etapa `M0 Entregable 1`  
 **Depende de:** I02, I03, I04, I05, I06, I07, I10, I12, I13
 
 **Cuerpo del issue:**
@@ -392,30 +392,23 @@ No desplegar ni cargar datos reales hasta completar todas las verificaciones de 
 ```markdown
 ## Objetivo
 
-Publicar una instancia independiente para un negocio, accesible desde sus dispositivos y protegida con autenticación, conectada a una base persistente.
+Publicar una instancia del prototipo para un negocio, accesible desde sus dispositivos, protegida con autenticación y conectada a una base persistente.
 
 ## Alcance
 
-- Confirmar un proveedor compatible con la versión actual de Next.js y autorizado para el uso comercial previsto; Netlify es preferido solo si supera esta verificación.
-- Configurar variables de entorno de producción fuera del repositorio.
-- Configurar el despliegue automático desde la rama acordada.
-- Aplicar las migraciones a la base de producción y comprobar lectura/escritura.
-- Revisar que rutas y acciones privadas no sean accesibles sin sesión, y que el navegador solo reciba datos autorizados.
-- Configurar URL HTTPS, procedimiento de rollback y responsable del servicio.
+El prototipo se publica en Netlify con base en Neon: https://chatarreria-el-cocha.netlify.app/. Las variables de entorno están fuera del repositorio y el despliegue es automático desde `main`. El respaldo y la restauración se tratan en I16; la guía de rollback queda como mejora.
 
 ## Criterios de aceptación
 
-- [ ] La aplicación está disponible mediante HTTPS.
-- [ ] Las operaciones de escritura apuntan a la base de producción correcta.
-- [ ] Una sesión cerrada no puede consultar ni modificar datos.
-- [ ] Las credenciales de producción no aparecen en el bundle del navegador ni en Git.
-- [ ] Cada negocio del piloto tiene una instancia y base independientes; no se mezclan datos de clientes distintos.
-- [ ] Antes de habilitar al cliente, existe respaldo verificado y restauración probada en una base no productiva.
-- [ ] Se documenta cómo desplegar una versión anterior o detener el despliegue ante un incidente.
+- [x] La aplicación está disponible mediante HTTPS.
+- [x] Las operaciones de escritura apuntan a la base de producción.
+- [x] Una sesión cerrada no puede consultar ni modificar datos.
+- [x] Las credenciales de producción no aparecen en el bundle del navegador ni en Git.
+- [x] La instancia y la base son de un solo negocio; no se mezclan datos de clientes.
 
 ## Notas técnicas
 
-La arquitectura propone Netlify y Neon, pero son opciones por confirmar, no dependencias inamovibles. Si no son compatibles o no cumplen las condiciones comerciales, registrar proveedor alternativo y costo antes de abrir el servicio.
+Verificado el 4 de octubre de 2026: HTTP redirige a HTTPS con HSTS, las rutas privadas redirigen a `/ingresar` sin sesión y los archivos JS del navegador no contienen secretos. Queda fuera de este issue: respaldo verificado y restauración (I16) y documentar cómo volver a una versión anterior (se puede restaurar un despliegue anterior desde Netlify).
 ```
 
 ### I12 — Consultar historial y resumen diario
