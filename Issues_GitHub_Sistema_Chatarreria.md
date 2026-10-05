@@ -932,6 +932,111 @@ Que los trabajadores entren con un nombre de usuario corto y no con un correo, q
 Plugin `username` de Better Auth con una migración que agrega `user.username` (único). El correo sigue siendo obligatorio en la base: para un trabajador puede ser un valor interno ficticio. Aplicar la migración en producción antes de desplegar el código.
 ```
 
+### I30 — Registrar gastos y reporte de gastos
+
+**Milestone:** M1 — Mejoras operativas  
+**Labels:** `feat`, `ui`  
+**Project:** Status `Por hacer` · Prioridad `Alta` · Tamaño `L` · Etapa `M1 Mejoras operativas`  
+**Depende de:** I02, I10, I27
+
+**Cuerpo del issue:**
+
+```markdown
+## Objetivo
+
+Que el administrador registre el dinero que sale de la chatarrería por motivos distintos a comprar material (pagos a personas, compras de insumos, servicios) y consulte cuánto se gastó por categoría.
+
+## Alcance
+
+- Registrar un gasto con fecha, categoría, monto, descripción, a quién se pagó (texto libre, opcional) y medio de pago (opcional).
+- Categorías ("items") administrables por el administrador, con un conjunto inicial: Pago a trabajadores, Transporte y fletes, Servicios públicos, Arriendo, Mantenimiento y herramientas, Insumos, Impuestos y trámites, Otros.
+- Los gastos no se borran ni se editan: se anulan con motivo, usuario y fecha, igual que las compras y ventas.
+- Reporte de gastos por período con total y desglose por categoría; el trabajador no ve ni registra gastos.
+
+## Criterios de aceptación
+
+- [ ] El administrador registra un gasto con categoría y monto; los campos opcionales pueden quedar vacíos.
+- [ ] El administrador crea y desactiva categorías sin perder los gastos ya registrados con ellas.
+- [ ] Un gasto anulado deja de contar en los totales y conserva quién, cuándo y por qué.
+- [ ] El reporte muestra el total del período y el desglose por categoría, y se puede filtrar por fechas y categoría.
+- [ ] El trabajador no puede ver ni registrar gastos, ni abrir sus rutas.
+
+## Notas técnicas
+
+Supuesto: solo el administrador gestiona gastos. Los montos son pesos enteros. Un gasto puede ser un pago a una persona (categoría "Pago a trabajadores" con el nombre en "pagado a") o la compra de algo para el negocio.
+```
+
+### I31 — Capital del negocio y saldo
+
+**Milestone:** M1 — Mejoras operativas  
+**Labels:** `feat`, `ui`  
+**Project:** Status `Por hacer` · Prioridad `Alta` · Tamaño `M` · Etapa `M1 Mejoras operativas`  
+**Depende de:** I04, I05, I30
+
+**Cuerpo del issue:**
+
+```markdown
+## Objetivo
+
+Conocer el dinero total con que cuenta el negocio y verlo bajar con cada compra y gasto, y subir con cada venta.
+
+## Alcance
+
+- Registrar el capital inicial y otros movimientos de capital (aporte o retiro del dueño) con fecha, monto y nota.
+- Calcular el saldo: capital aportado menos retiros, más ventas, menos compras, menos gastos; solo cuentan las operaciones activas.
+- Mostrar el saldo actual y su desglose en la pantalla de capital y en el inicio del administrador.
+- Mostrar la evolución del saldo por día en un período.
+
+## Criterios de aceptación
+
+- [ ] El administrador registra el capital inicial y los aportes o retiros posteriores.
+- [ ] Al registrar una compra o un gasto el saldo baja por su monto; al registrar una venta sube.
+- [ ] Anular una compra, venta o gasto devuelve el saldo a su valor anterior.
+- [ ] El saldo se muestra con su desglose (capital, ventas, compras, gastos, retiros).
+- [ ] El trabajador no ve el saldo ni los movimientos de capital.
+
+## Notas técnicas
+
+Supuesto: el saldo es caja disponible y las compras y ventas se consideran pagadas de contado en el momento. Si existen fiados o créditos se tratarán en un issue aparte. El inventario no se suma al saldo; se muestra su valor aparte en el reporte de rentabilidad (I32).
+```
+
+### I32 — Reporte de rentabilidad
+
+**Milestone:** M1 — Mejoras operativas  
+**Labels:** `feat`, `ui`, `inventario`  
+**Project:** Status `Por hacer` · Prioridad `Alta` · Tamaño `L` · Etapa `M1 Mejoras operativas`  
+**Depende de:** I05, I06, I30, I31
+
+**Cuerpo del issue:**
+
+```markdown
+## Objetivo
+
+Saber cuánto gana realmente el negocio en un período, descontando lo que costó el material vendido y los gastos, y cuánto valdría el inventario si se vendiera a un mayorista.
+
+## Alcance
+
+- Ingresos: total de ventas activas del período.
+- Costo de lo vendido: costo promedio ponderado de compra de cada material, aplicado a los kilos vendidos.
+- Utilidad bruta = ingresos − costo de lo vendido, con margen porcentual y desglose por material.
+- Gastos del período por categoría (I30) y utilidad neta = utilidad bruta − gastos.
+- Inventario actual valorado al costo y al precio de venta mayorista del material; diferencia como utilidad potencial.
+- Filtro por rango de fechas; solo el administrador.
+
+## Criterios de aceptación
+
+- [ ] El reporte muestra ingresos, costo de lo vendido, utilidad bruta, gastos por categoría y utilidad neta del período.
+- [ ] El costo de lo vendido usa el costo promedio ponderado de las compras activas del material hasta la fecha de la venta.
+- [ ] Anular una compra, venta o gasto cambia el reporte de forma coherente.
+- [ ] Se muestra el valor del inventario al costo y al precio de venta mayorista, con la utilidad potencial.
+- [ ] Los materiales sin precio de venta o sin compras se señalan, no se valoran en cero en silencio.
+- [ ] El trabajador no accede al reporte.
+
+## Notas técnicas
+
+Supuesto: "precio de venta a mayorista" es el precio de venta configurado en el material. Si el negocio vende a varios niveles de precio se definirá en un issue aparte. El costo promedio se recalcula por material a partir de las compras activas; las correcciones y anulaciones lo ajustan.
+```
+
 ## Resumen de dependencias y orden sugerido
 
 ### Criterio de salida de M0
@@ -952,6 +1057,7 @@ M1: I09 terceros (depende de I02/I04)
     I12 + I13 + I24 -> I25 teléfono -> I26 diseño
     I27 rol de trabajador (M0) -> I28 gestión de usuarios
     I27 -> I29 inicio de sesión con usuario (M0)
+    PRIORIDAD: I30 gastos -> I31 capital y saldo -> I32 rentabilidad
 
 M2: I17 -> I18 -> I19 (I19 también requiere I04/I05)
 
