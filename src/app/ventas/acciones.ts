@@ -22,6 +22,7 @@ export async function registrarVentaAccion(
   const precios = formData.getAll("precioPorKg").map(String);
   const resultado = await operaciones.registrarVenta(
     {
+      terceroId: String(formData.get("terceroId") ?? ""),
       lineas: formData.getAll("materialId").map((materialId, indice) => ({
         materialId: String(materialId),
         pesoKg: pesos[indice] ?? "",

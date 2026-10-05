@@ -6,6 +6,8 @@ import { loadEnvConfig } from "@next/env";
 import { count } from "drizzle-orm";
 import { crearCasosDeUsoMateriales } from "../src/modules/materiales/application/casos-de-uso";
 import { crearRepositorioMateriales } from "../src/modules/materiales/infrastructure/repositorio-drizzle";
+import { crearCasosDeUsoTerceros } from "../src/modules/terceros/application/casos-de-uso";
+import { crearRepositorioTerceros } from "../src/modules/terceros/infrastructure/repositorio-drizzle";
 import { crearCasosDeUsoOperaciones } from "../src/modules/operaciones/application/casos-de-uso";
 import { crearRepositorioOperaciones } from "../src/modules/operaciones/infrastructure/repositorio-drizzle";
 import { crearConexion } from "../src/server/db/cliente";
@@ -37,6 +39,9 @@ async function main() {
     const operaciones = crearCasosDeUsoOperaciones(
       crearRepositorioOperaciones(() => db),
       materiales,
+      {
+        obtenerTercero: crearCasosDeUsoTerceros(crearRepositorioTerceros(() => db)).obtenerTercero,
+      },
     );
 
     const ids = new Map<string, string>();

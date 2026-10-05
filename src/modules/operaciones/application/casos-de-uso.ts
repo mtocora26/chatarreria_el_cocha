@@ -1,4 +1,5 @@
 import type { Material, Tarifa } from "@/modules/materiales/domain/material";
+import { sirvePara, type Tercero } from "@/modules/terceros/domain/tercero";
 import { z } from "zod";
 import type { Pesos } from "@/shared/dominio/dinero";
 import { esDiaValido, inicioDiaNegocio, sumarDias } from "@/shared/dominio/fecha";
@@ -30,6 +31,7 @@ export type DetalleOperacion = OperacionGuardada & {
   estado: "activa" | "anulada";
   fecha: Date;
   total: Pesos;
+  tercero: { id: string; nombre: string } | null;
   anulacion: { fecha: Date; usuario: string; motivo: string } | null;
   /** Operación anulada que esta reemplaza. */
   corrigeA: Referencia | null;
@@ -53,6 +55,7 @@ export type ResumenOperacion = OperacionGuardada & {
   estado: "activa" | "anulada";
   fecha: Date;
   total: Pesos;
+  tercero: string | null;
   materiales: string[];
 };
 
@@ -103,6 +106,10 @@ export interface RepositorioOperaciones {
 export interface CatalogoMateriales {
   listarMateriales(): Promise<Material[]>;
   obtenerMateriales(ids: string[]): Promise<Material[]>;
+}
+
+export interface CatalogoTerceros {
+  obtenerTercero(id: string): Promise<Tercero | null>;
 }
 
 export type ExistenciaMaterial = Pick<Material, "id" | "nombre" | "activo"> & { stock: Gramos };
@@ -192,12 +199,30 @@ function filtroDesdeEntrada(entrada: EntradaHistorial): Historial["filtro"] {
 export function crearCasosDeUsoOperaciones(
   repositorio: RepositorioOperaciones,
   catalogo: CatalogoMateriales,
+  catalogoTerceros: CatalogoTerceros,
 ) {
+  /** Vacío es válido: el tercero es opcional. Debe existir y corresponder al tipo de operación. */
+  async function resolverTercero(
+    id: string | undefined,
+    tipo: TipoOperacion,
+  ): Promise<Resultado<string | null, ErroresOperacion>> {
+    const limpio = id?.trim() ?? "";
+    if (limpio === "") return exito(null);
+    const tercero = esId(limpio) ? await catalogoTerceros.obtenerTercero(limpio) : null;
+    const quien = tipo === "compra" ? "proveedor" : "cliente";
+    if (!tercero) return fallo({ terceroId: `Elige un ${quien} de la lista.` });
+    if (!sirvePara(tercero, tipo)) return fallo({ terceroId: `Este tercero no es un ${quien}.` });
+    return exito(tercero.id);
+  }
+
   async function prepararCompra(
     entrada: EntradaCompra,
   ): Promise<Resultado<NuevaOperacion, ErroresOperacion>> {
     const validacion = esquemaCompra.safeParse(entrada);
-    if (!validacion.success) return fallo(erroresPorRuta(validacion.error));
+    const tercero = await resolverTercero(entrada.terceroId, "compra");
+    if (!validacion.success) {
+      return fallo({ ...erroresPorRuta(validacion.error), ...(tercero.ok ? {} : tercero.error) });
+    }
 
     const { tarifa, lineas } = validacion.data;
     const materiales = await catalogo.obtenerMateriales(lineas.map((l) => l.materialId));
@@ -214,14 +239,19 @@ export function crearCasosDeUsoOperaciones(
       })),
       tarifa,
     );
-    return compra.ok ? compra : fallo(erroresDeDominio(compra.error));
+    if (!compra.ok)
+      return fallo({ ...erroresDeDominio(compra.error), ...(tercero.ok ? {} : tercero.error) });
+    return tercero.ok ? exito({ ...compra.valor, terceroId: tercero.valor }) : fallo(tercero.error);
   }
 
   async function prepararVenta(
     entrada: EntradaVenta,
   ): Promise<Resultado<NuevaOperacion, ErroresOperacion>> {
     const validacion = esquemaVenta.safeParse(entrada);
-    if (!validacion.success) return fallo(erroresPorRuta(validacion.error));
+    const tercero = await resolverTercero(entrada.terceroId, "venta");
+    if (!validacion.success) {
+      return fallo({ ...erroresPorRuta(validacion.error), ...(tercero.ok ? {} : tercero.error) });
+    }
 
     const { lineas } = validacion.data;
     const materiales = await catalogo.obtenerMateriales(lineas.map((l) => l.materialId));
@@ -237,7 +267,9 @@ export function crearCasosDeUsoOperaciones(
         equivalenciaKg: l.equivalenciaKg,
       })),
     );
-    return venta.ok ? venta : fallo(erroresDeDominio(venta.error));
+    if (!venta.ok)
+      return fallo({ ...erroresDeDominio(venta.error), ...(tercero.ok ? {} : tercero.error) });
+    return tercero.ok ? exito({ ...venta.valor, terceroId: tercero.valor }) : fallo(tercero.error);
   }
 
   /** Valida la corrección antes de tocar la base; devuelve el motivo limpio. */

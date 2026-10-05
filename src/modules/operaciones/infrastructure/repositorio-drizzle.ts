@@ -1,6 +1,12 @@
 import { and, asc, desc, eq, exists, gte, inArray, lt, sql, type SQL } from "drizzle-orm";
 import type { BaseDeDatos } from "@/server/db/cliente";
-import { authUser, lineasTransaccion, materiales, transacciones } from "@/server/db/schema";
+import {
+  authUser,
+  lineasTransaccion,
+  materiales,
+  terceros,
+  transacciones,
+} from "@/server/db/schema";
 import { pesosANumeric, pesosDesdeNumeric } from "@/shared/dominio/dinero";
 import { gramosANumeric, gramosDesdeNumeric } from "@/shared/dominio/peso";
 import { exito, fallo, type Resultado } from "@/shared/dominio/resultado";
@@ -123,7 +129,12 @@ async function marcarAnulada(
 async function insertar(ejecutor: Ejecutor, operacion: NuevaOperacion, corrigeA?: string) {
   const [guardada] = await ejecutor
     .insert(transacciones)
-    .values({ tipo: operacion.tipo, total: pesosANumeric(operacion.total), corrigeA })
+    .values({
+      tipo: operacion.tipo,
+      terceroId: operacion.terceroId ?? null,
+      total: pesosANumeric(operacion.total),
+      corrigeA,
+    })
     .returning({ id: transacciones.id, consecutivo: transacciones.consecutivo });
 
   await ejecutor.insert(lineasTransaccion).values(
@@ -241,9 +252,12 @@ export function crearRepositorioOperaciones(obtenerDb: () => BaseDeDatos): Repos
           motivoAnulacion: transacciones.motivoAnulacion,
           usuarioAnulacion: authUser.name,
           corrigeA: transacciones.corrigeA,
+          terceroId: terceros.id,
+          terceroNombre: terceros.nombre,
         })
         .from(transacciones)
         .leftJoin(authUser, eq(authUser.id, transacciones.anuladaPor))
+        .leftJoin(terceros, eq(terceros.id, transacciones.terceroId))
         .where(eq(transacciones.id, id));
       if (!transaccion) return null;
 
@@ -282,6 +296,10 @@ export function crearRepositorioOperaciones(obtenerDb: () => BaseDeDatos): Repos
         estado: transaccion.estado,
         fecha: transaccion.fecha,
         total: pesosDesdeNumeric(transaccion.total),
+        tercero:
+          transaccion.terceroId && transaccion.terceroNombre
+            ? { id: transaccion.terceroId, nombre: transaccion.terceroNombre }
+            : null,
         anulacion:
           transaccion.anuladaEn && transaccion.motivoAnulacion
             ? {
@@ -318,6 +336,7 @@ export function crearRepositorioOperaciones(obtenerDb: () => BaseDeDatos): Repos
           estado: transacciones.estado,
           fecha: transacciones.fecha,
           total: transacciones.total,
+          tercero: terceros.nombre,
           // Drizzle omite el nombre de la tabla en las columnas dentro de sql``: sin los
           // nombres explícitos, "id" sería ambiguo entre la subconsulta y la externa.
           materiales: sql<string[]>`coalesce((
@@ -328,6 +347,7 @@ export function crearRepositorioOperaciones(obtenerDb: () => BaseDeDatos): Repos
           ), '{}')`,
         })
         .from(transacciones)
+        .leftJoin(terceros, eq(terceros.id, transacciones.terceroId))
         .where(
           and(
             ...condicionesHistorial(filtro, db),

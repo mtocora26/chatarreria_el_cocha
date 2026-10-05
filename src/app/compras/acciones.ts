@@ -24,6 +24,7 @@ export async function registrarCompraAccion(
   const precios = formData.getAll("precioPorKg").map(String);
   const resultado = await operaciones.registrarCompra(
     {
+      terceroId: String(formData.get("terceroId") ?? ""),
       tarifa: String(formData.get("tarifa") ?? ""),
       lineas: formData.getAll("materialId").map((materialId, indice) => ({
         materialId: String(materialId),

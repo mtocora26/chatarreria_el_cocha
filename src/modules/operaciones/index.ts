@@ -1,5 +1,6 @@
 import "server-only";
 import { materiales } from "@/modules/materiales";
+import { terceros } from "@/modules/terceros";
 import { obtenerDb } from "@/server/db";
 import { crearCasosDeUsoOperaciones } from "./application/casos-de-uso";
 import { crearRepositorioOperaciones } from "./infrastructure/repositorio-drizzle";
@@ -7,6 +8,7 @@ import { crearRepositorioOperaciones } from "./infrastructure/repositorio-drizzl
 export const operaciones = crearCasosDeUsoOperaciones(
   crearRepositorioOperaciones(obtenerDb),
   materiales,
+  terceros,
 );
 
 export type {

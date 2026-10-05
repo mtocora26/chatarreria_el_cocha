@@ -78,6 +78,7 @@ export function ListaOperaciones({
                   {formatearFechaHora(operacion.fecha)}
                 </span>
                 <span className="col-span-2 truncate text-sm sm:col-span-1">
+                  {operacion.tercero && <span className="font-medium">{operacion.tercero} · </span>}
                   {operacion.materiales.join(", ")}
                 </span>
                 <span

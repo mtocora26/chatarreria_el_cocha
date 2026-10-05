@@ -20,6 +20,10 @@ type SelectorMaterialProps = {
   /** Si se define, ofrece crear un material con el texto buscado cuando no existe. */
   onCrear?: (nombre: string) => void;
   invalido?: boolean;
+  /** Nombre del campo oculto que viaja en el formulario. */
+  nombreCampo?: string;
+  placeholder?: string;
+  sinResultados?: string;
 };
 
 /** Minúsculas y sin tildes: "cobre" encuentra "Cóbre". */
@@ -43,6 +47,9 @@ export function SelectorMaterial({
   onElegir,
   onCrear,
   invalido = false,
+  nombreCampo = "materialId",
+  placeholder = "Escribe para buscar…",
+  sinResultados = "No hay materiales con ese nombre.",
 }: SelectorMaterialProps) {
   const idLista = useId();
   const elegido = opciones.find((o) => o.id === valor);
@@ -111,7 +118,7 @@ export function SelectorMaterial({
       <label htmlFor={id} className="mb-1 block text-sm font-medium text-stone-700">
         {etiqueta}
       </label>
-      <input type="hidden" name="materialId" value={valor} />
+      <input type="hidden" name={nombreCampo} value={valor} />
       <input
         id={id}
         type="text"
@@ -122,7 +129,7 @@ export function SelectorMaterial({
         aria-activedescendant={abierto && total > 0 ? idOpcion(indiceActivo) : undefined}
         aria-invalid={invalido}
         autoComplete="off"
-        placeholder="Escribe para buscar…"
+        placeholder={placeholder}
         value={texto}
         onChange={(e) => {
           setBusqueda(e.target.value);
@@ -186,9 +193,7 @@ export function SelectorMaterial({
               <span aria-hidden>＋</span> Crear «{(busqueda ?? "").trim()}»
             </li>
           )}
-          {total === 0 && (
-            <li className="px-3 py-2 text-sm text-stone-500">No hay materiales con ese nombre.</li>
-          )}
+          {total === 0 && <li className="px-3 py-2 text-sm text-stone-500">{sinResultados}</li>}
         </ul>
       )}
     </div>

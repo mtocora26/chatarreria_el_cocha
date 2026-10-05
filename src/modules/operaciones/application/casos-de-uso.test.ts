@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Material } from "@/modules/materiales/domain/material";
+import type { Tercero } from "@/modules/terceros/domain/tercero";
 import { verificarStock, type NuevaOperacion } from "../domain/operacion";
 import { crearCasosDeUsoOperaciones, type RepositorioOperaciones } from "./casos-de-uso";
 
@@ -23,6 +24,13 @@ const catalogo: Material[] = [
     precioVenta: 1,
     activo: false,
   },
+];
+
+const PROVEEDOR_ID = "11111111-1111-4111-8111-111111111111";
+const CLIENTE_ID = "22222222-2222-4222-8222-222222222222";
+const terceros: Tercero[] = [
+  { id: PROVEEDOR_ID, nombre: "Juan", documento: null, telefono: null, tipo: "proveedor" },
+  { id: CLIENTE_ID, nombre: "Ana", documento: null, telefono: null, tipo: "cliente" },
 ];
 
 function preparar(stockDisponible = new Map<string, number>()) {
@@ -52,10 +60,16 @@ function preparar(stockDisponible = new Map<string, number>()) {
       return { ok: true, valor: { id: "id", consecutivo: guardadas.length } };
     },
   };
-  const casos = crearCasosDeUsoOperaciones(repositorio, {
-    listarMateriales: async () => catalogo,
-    obtenerMateriales: async (ids) => catalogo.filter((m) => ids.includes(m.id)),
-  });
+  const casos = crearCasosDeUsoOperaciones(
+    repositorio,
+    {
+      listarMateriales: async () => catalogo,
+      obtenerMateriales: async (ids) => catalogo.filter((m) => ids.includes(m.id)),
+    },
+    {
+      obtenerTercero: async (id) => terceros.find((t) => t.id === id) ?? null,
+    },
+  );
   return { casos, guardadas };
 }
 
@@ -163,5 +177,46 @@ describe("consultarInventario", () => {
       { id: COBRE_ID, nombre: "Cobre", activo: true, stock: 2500 },
       { id: INACTIVO_ID, nombre: "Bronce", activo: false, stock: 0 },
     ]);
+  });
+});
+
+describe("tercero de la operación", () => {
+  const lineas = [{ materialId: COBRE_ID, pesoKg: "1" }];
+
+  it("guarda el proveedor en una compra y permite dejarlo vacío", async () => {
+    const { casos, guardadas } = preparar();
+    await casos.registrarCompra({ tarifa: "minorista", lineas, terceroId: PROVEEDOR_ID });
+    await casos.registrarCompra({ tarifa: "minorista", lineas, terceroId: "" });
+    expect(guardadas[0].terceroId).toBe(PROVEEDOR_ID);
+    expect(guardadas[1].terceroId).toBeNull();
+  });
+
+  it("rechaza un cliente en una compra y un proveedor en una venta", async () => {
+    const { casos, guardadas } = preparar(new Map([[COBRE_ID, 5000]]));
+    const compra = await casos.registrarCompra({
+      tarifa: "minorista",
+      lineas,
+      terceroId: CLIENTE_ID,
+    });
+    const venta = await casos.registrarVenta({
+      lineas: [{ materialId: COBRE_ID, pesoKg: "1", precioPorKg: "34000" }],
+      terceroId: PROVEEDOR_ID,
+    });
+    expect(compra).toEqual({ ok: false, error: { terceroId: "Este tercero no es un proveedor." } });
+    expect(venta).toEqual({ ok: false, error: { terceroId: "Este tercero no es un cliente." } });
+    expect(guardadas).toHaveLength(0);
+  });
+
+  it("rechaza un tercero que no existe", async () => {
+    const { casos } = preparar();
+    const resultado = await casos.registrarCompra({
+      tarifa: "minorista",
+      lineas,
+      terceroId: "33333333-3333-4333-8333-333333333333",
+    });
+    expect(resultado).toEqual({
+      ok: false,
+      error: { terceroId: "Elige un proveedor de la lista." },
+    });
   });
 });

@@ -5,7 +5,7 @@ const rutas = (esAdmin: boolean) => seccionesPara(esAdmin).map(({ href }) => hre
 
 describe("seccionesPara", () => {
   it("el trabajador solo registra compras y ventas y consulta materiales", () => {
-    expect(rutas(false)).toEqual(["/compras", "/ventas", "/materiales"]);
+    expect(rutas(false)).toEqual(["/compras", "/ventas", "/materiales", "/terceros"]);
   });
 
   it("el administrador ve todas las secciones, incluidos inventario, historial y usuarios", () => {
@@ -15,6 +15,7 @@ describe("seccionesPara", () => {
       "/inventario",
       "/historial",
       "/materiales",
+      "/terceros",
       "/usuarios",
     ]);
   });
