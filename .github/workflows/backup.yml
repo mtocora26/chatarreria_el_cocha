@@ -1,0 +1,81 @@
+name: Respaldo de la base de datos
+
+# Copia diaria de producción con pg_dump y prueba de restauración en una base
+# temporal que se descarta al terminar. Ver docs/respaldos.md.
+on:
+  schedule:
+    - cron: "0 8 * * *" # 03:00 hora de Colombia
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: respaldo
+  cancel-in-progress: false
+
+env:
+  # pg_dump de una versión mayor o igual a la del servidor puede leer cualquier Postgres anterior.
+  IMAGEN_POSTGRES: postgres:18
+
+jobs:
+  respaldo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      restauracion:
+        image: postgres:18
+        env:
+          POSTGRES_PASSWORD: restauracion
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Generar copia
+        env:
+          BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+        run: |
+          set -euo pipefail
+          # La cadena de conexión viaja por variable de entorno: no aparece en el comando ni en los logs.
+          docker run --rm -e BACKUP_DATABASE_URL "$IMAGEN_POSTGRES" \
+            sh -c 'pg_dump --format=custom --no-owner --no-privileges "$BACKUP_DATABASE_URL"' \
+            > respaldo.dump
+          test -s respaldo.dump
+
+      - name: Probar restauración en una base temporal
+        run: |
+          set -euo pipefail
+          docker run --rm --network host -v "$PWD:/copia:ro" "$IMAGEN_POSTGRES" \
+            pg_restore --no-owner --no-privileges --exit-on-error \
+            --dbname "postgresql://postgres:restauracion@127.0.0.1:5432/postgres" /copia/respaldo.dump
+          # Sin tablas restauradas la copia no sirve, aunque pg_restore no haya fallado.
+          tablas=$(docker run --rm --network host "$IMAGEN_POSTGRES" psql -At \
+            "postgresql://postgres:restauracion@127.0.0.1:5432/postgres" \
+            -c "select count(*) from information_schema.tables where table_schema = 'public'")
+          echo "Tablas restauradas: $tablas"
+          test "$tablas" -ge 8
+          docker run --rm --network host "$IMAGEN_POSTGRES" psql -At \
+            "postgresql://postgres:restauracion@127.0.0.1:5432/postgres" \
+            -c "select 'materiales', count(*) from materiales"
+
+      - name: Cifrar copia
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          gpg --batch --yes --pinentry-mode loopback --symmetric --cipher-algo AES256 \
+            --passphrase-file <(printf '%s' "$BACKUP_PASSPHRASE") \
+            --output "respaldo-$(date -u +%F).dump.gpg" respaldo.dump
+          rm respaldo.dump
+
+      - name: Guardar copia cifrada
+        uses: actions/upload-artifact@v4
+        with:
+          name: respaldo-${{ github.run_id }}
+          path: respaldo-*.dump.gpg
+          retention-days: 30
+          if-no-files-found: error
