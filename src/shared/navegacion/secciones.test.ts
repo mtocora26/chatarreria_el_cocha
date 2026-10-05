@@ -8,13 +8,14 @@ describe("seccionesPara", () => {
     expect(rutas(false)).toEqual(["/compras", "/ventas", "/materiales"]);
   });
 
-  it("el administrador ve todas las secciones, incluidos inventario e historial", () => {
+  it("el administrador ve todas las secciones, incluidos inventario, historial y usuarios", () => {
     expect(rutas(true)).toEqual([
       "/compras",
       "/ventas",
       "/inventario",
       "/historial",
       "/materiales",
+      "/usuarios",
     ]);
   });
 });

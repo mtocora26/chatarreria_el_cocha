@@ -1,11 +1,11 @@
 "use client";
 
-import { useActionState, useRef } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { Aviso } from "./aviso";
 import { claseBotonPeligro, claseBotonPrimario, claseBotonSecundario } from "./estilos";
 
-/** Estado que devuelve una acción confirmada; si sale bien, la acción redirige. */
-export type EstadoAccionConfirmada = { error?: string };
+/** Estado de una acción confirmada: redirige si sale bien, o devuelve `hecho` para cerrar el diálogo en la misma página. */
+export type EstadoAccionConfirmada = { error?: string; hecho?: boolean };
 
 type DialogoConfirmacionProps = {
   textoBoton: string;
@@ -28,7 +28,15 @@ export function DialogoConfirmacion({
   children,
 }: DialogoConfirmacionProps) {
   const dialogo = useRef<HTMLDialogElement>(null);
+  const formulario = useRef<HTMLFormElement>(null);
   const [estado, enviar, enviando] = useActionState(accion, {});
+
+  useEffect(() => {
+    if (estado.hecho) {
+      dialogo.current?.close();
+      formulario.current?.reset();
+    }
+  }, [estado]);
 
   return (
     <>
@@ -40,7 +48,7 @@ export function DialogoConfirmacion({
         aria-labelledby={`${titulo}-titulo`}
         className="m-auto w-[calc(100%-2rem)] max-w-md rounded-xl border border-stone-200 bg-white p-0 text-stone-900 shadow-xl backdrop:bg-stone-900/50"
       >
-        <form action={enviar} className="space-y-4 p-5">
+        <form ref={formulario} action={enviar} className="space-y-4 p-5">
           <h2 id={`${titulo}-titulo`} className="text-lg font-semibold">
             {titulo}
           </h2>
