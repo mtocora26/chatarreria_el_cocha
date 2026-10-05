@@ -26,6 +26,12 @@ const ICONOS: Record<Seccion["href"], React.ReactNode> = {
       <path d="M4 6h16M4 12h16M4 18h10" />
     </>
   ),
+  "/usuarios": (
+    <>
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
+    </>
+  ),
 };
 
 function Icono({ href }: { href: Seccion["href"] }) {

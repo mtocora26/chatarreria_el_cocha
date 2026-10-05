@@ -1,5 +1,5 @@
 export type Seccion = {
-  href: "/compras" | "/ventas" | "/inventario" | "/historial" | "/materiales";
+  href: "/compras" | "/ventas" | "/inventario" | "/historial" | "/materiales" | "/usuarios";
   titulo: string;
   descripcion: string;
   /** El trabajador no la ve ni puede abrirla. */
@@ -33,6 +33,12 @@ export const SECCIONES: readonly Seccion[] = [
     href: "/materiales",
     titulo: "Materiales",
     descripcion: "Materiales y precios por kilo de compra y venta.",
+  },
+  {
+    href: "/usuarios",
+    titulo: "Usuarios",
+    descripcion: "Crear trabajadores y gestionar su acceso.",
+    soloAdmin: true,
   },
 ];
 
