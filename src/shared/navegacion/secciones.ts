@@ -6,6 +6,7 @@ export type Seccion = {
     | "/historial"
     | "/materiales"
     | "/terceros"
+    | "/gastos"
     | "/usuarios";
   titulo: string;
   descripcion: string;
@@ -45,6 +46,12 @@ export const SECCIONES: readonly Seccion[] = [
     href: "/terceros",
     titulo: "Terceros",
     descripcion: "Clientes y proveedores asociados a compras y ventas.",
+  },
+  {
+    href: "/gastos",
+    titulo: "Gastos",
+    descripcion: "Dinero que sale del negocio, por categoría.",
+    soloAdmin: true,
   },
   {
     href: "/usuarios",

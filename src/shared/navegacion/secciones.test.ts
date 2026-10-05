@@ -16,6 +16,7 @@ describe("seccionesPara", () => {
       "/historial",
       "/materiales",
       "/terceros",
+      "/gastos",
       "/usuarios",
     ]);
   });
