@@ -108,6 +108,7 @@ export const tipoTercero = pgEnum("tipo_tercero", ["cliente", "proveedor", "ambo
 export const tipoTransaccion = pgEnum("tipo_transaccion", ["compra", "venta"]);
 export const estadoTransaccion = pgEnum("estado_transaccion", ["activa", "anulada"]);
 export const tarifa = pgEnum("tarifa", ["minorista", "mayorista"]);
+export const tipoMovimientoCapital = pgEnum("tipo_movimiento_capital", ["aporte", "retiro"]);
 export const origenPeso = pgEnum("origen_peso", ["manual", "bascula"]);
 
 export const materiales = pgTable(
@@ -250,6 +251,35 @@ export const gastos = pgTable(
     check("gastos_monto_positivo", sql`${t.monto} > 0`),
     check(
       "gastos_anulacion_completa",
+      sql`(${t.estado} = 'activa' AND ${t.anuladoEn} IS NULL AND ${t.anuladoPor} IS NULL AND ${t.motivoAnulacion} IS NULL)
+        OR (${t.estado} = 'anulada' AND ${t.anuladoEn} IS NOT NULL AND ${t.anuladoPor} IS NOT NULL AND ${t.motivoAnulacion} IS NOT NULL)`,
+    ),
+  ],
+);
+
+// Aportes (capital inicial, dinero que el dueño pone) y retiros. Se anulan, no se editan.
+export const movimientosCapital = pgTable(
+  "movimientos_capital",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    fecha: timestamp({ withTimezone: true }).notNull(),
+    tipo: tipoMovimientoCapital().notNull(),
+    monto: dinero().notNull(),
+    nota: text(),
+    estado: estadoTransaccion().notNull().default("activa"),
+    anuladoEn: timestamp({ withTimezone: true }),
+    anuladoPor: text().references(() => authUser.id, { onDelete: "restrict" }),
+    motivoAnulacion: text(),
+    creadoPor: text()
+      .notNull()
+      .references(() => authUser.id, { onDelete: "restrict" }),
+    ...marcasDeTiempo,
+  },
+  (t) => [
+    index("movimientos_capital_fecha_idx").on(t.fecha),
+    check("movimientos_capital_monto_positivo", sql`${t.monto} > 0`),
+    check(
+      "movimientos_capital_anulacion_completa",
       sql`(${t.estado} = 'activa' AND ${t.anuladoEn} IS NULL AND ${t.anuladoPor} IS NULL AND ${t.motivoAnulacion} IS NULL)
         OR (${t.estado} = 'anulada' AND ${t.anuladoEn} IS NOT NULL AND ${t.anuladoPor} IS NOT NULL AND ${t.motivoAnulacion} IS NOT NULL)`,
     ),

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { connection } from "next/server";
+import { capital } from "@/modules/capital";
 import { operaciones } from "@/modules/operaciones";
 import { ListaOperaciones } from "@/modules/operaciones/ui/lista-operaciones";
 import { formatearCOP } from "@/shared/dominio/dinero";
@@ -14,9 +15,12 @@ export default async function Inicio() {
   const administrador = esAdmin(sesion);
   // Los totales del día son solo del administrador: el trabajador no los consulta.
   const hoy = diaNegocio(new Date());
-  const delDia = administrador
-    ? await operaciones.consultarHistorial({ desde: hoy, hasta: hoy })
-    : null;
+  const [delDia, saldo] = administrador
+    ? await Promise.all([
+        operaciones.consultarHistorial({ desde: hoy, hasta: hoy }),
+        capital.consultarSaldo(),
+      ])
+    : [null, null];
 
   return (
     <>
@@ -52,6 +56,20 @@ export default async function Inicio() {
 
       {delDia && (
         <>
+          {saldo && (
+            <Link
+              href="/capital"
+              className={`${claseTarjeta} hover:border-oro-500 mb-6 block p-4 transition`}
+            >
+              <p className="text-sm text-stone-500">Capital disponible</p>
+              <p
+                className={`mt-1 text-2xl font-bold tabular-nums sm:text-3xl ${saldo.saldo < 0 ? "text-red-700" : ""}`}
+              >
+                {formatearCOP(saldo.saldo)}
+              </p>
+            </Link>
+          )}
+
           <section aria-labelledby="resumen-hoy" className="mb-8">
             <h2 id="resumen-hoy" className="mb-3 text-lg font-semibold text-stone-900">
               Hoy

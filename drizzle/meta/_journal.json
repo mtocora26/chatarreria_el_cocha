@@ -57,6 +57,13 @@
       "when": 1791167583328,
       "tag": "0007_gastos",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791167823907,
+      "tag": "0008_capital",
+      "breakpoints": true
     }
   ]
 }

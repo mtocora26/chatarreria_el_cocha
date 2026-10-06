@@ -40,6 +40,12 @@ const ICONOS: Record<Seccion["href"], React.ReactNode> = {
       <path d="M6 9v.01M18 15v.01" />
     </>
   ),
+  "/capital": (
+    <>
+      <path d="M3 18l6-6 4 4 8-8" />
+      <path d="M15 8h6v6" />
+    </>
+  ),
   "/usuarios": (
     <>
       <circle cx="12" cy="8" r="4" />
