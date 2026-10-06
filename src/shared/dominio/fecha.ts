@@ -11,6 +11,17 @@ export function formatearFechaHora(fecha: Date): string {
   return formatoFechaHora.format(fecha);
 }
 
+const formatoFechaHoraIso = new Intl.DateTimeFormat("sv-SE", {
+  timeZone: ZONA_HORARIA_NEGOCIO,
+  dateStyle: "short",
+  timeStyle: "short",
+});
+
+/** "AAAA-MM-DD HH:mm" en hora del negocio: Excel lo reconoce como fecha en cualquier idioma. */
+export function formatearFechaHoraIso(fecha: Date): string {
+  return formatoFechaHoraIso.format(fecha);
+}
+
 // Colombia no tiene horario de verano: el desfase es fijo.
 const DESFASE_NEGOCIO = "-05:00";
 const DIA = /^\d{4}-\d{2}-\d{2}$/;

@@ -16,6 +16,7 @@ export type {
   EntradaHistorial,
   ExistenciaMaterial,
   Historial,
+  LineaExportable,
   ResumenOperacion,
   ResumenPeriodo,
 } from "./application/casos-de-uso";

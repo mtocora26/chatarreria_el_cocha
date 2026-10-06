@@ -75,6 +75,19 @@ export type ResumenPeriodo = {
   anuladas: number;
 };
 
+/** Una línea de operación con los datos de su encabezado, lista para exportar. */
+export type LineaExportable = {
+  consecutivo: number;
+  fecha: Date;
+  tipo: TipoOperacion;
+  estado: "activa" | "anulada";
+  tercero: string | null;
+  material: string;
+  gramos: Gramos;
+  precioPorKg: Pesos;
+  subtotal: Pesos;
+};
+
 export type DatosAnulacion = { usuarioId: string; motivo: string };
 
 export type ErrorAnulacion =
@@ -93,6 +106,8 @@ export interface RepositorioOperaciones {
   /** Más recientes primero; `antesDe` es el consecutivo desde el que continúa la página. */
   listar(filtro: FiltroHistorial, limite: number, antesDe?: number): Promise<ResumenOperacion[]>;
   resumir(filtro: FiltroHistorial): Promise<ResumenPeriodo>;
+  /** Todas las líneas del filtro, de la más antigua a la más reciente, sin paginar. */
+  listarLineas(filtro: FiltroHistorial): Promise<LineaExportable[]>;
   /** Anula de forma atómica; rechaza si deja stock negativo o si ya estaba anulada. */
   anular(id: string, datos: DatosAnulacion): Promise<Resultado<void, ErrorAnulacion>>;
   /** Anula `id` y guarda `nueva` en su lugar dentro de la misma transacción. */
@@ -193,6 +208,15 @@ function filtroDesdeEntrada(entrada: EntradaHistorial): Historial["filtro"] {
     hasta: entrada.hasta && esDiaValido(entrada.hasta) ? entrada.hasta : undefined,
     tipo,
     materialId: entrada.materialId && esId(entrada.materialId) ? entrada.materialId : undefined,
+  };
+}
+
+function consultaDesdeFiltro(filtro: Historial["filtro"]): FiltroHistorial {
+  return {
+    tipo: filtro.tipo,
+    materialId: filtro.materialId,
+    desde: filtro.desde ? inicioDiaNegocio(filtro.desde) : undefined,
+    hasta: filtro.hasta ? inicioDiaNegocio(sumarDias(filtro.hasta, 1)) : undefined,
   };
 }
 
@@ -318,15 +342,15 @@ export function crearCasosDeUsoOperaciones(
       }));
     },
 
+    /** Mismos filtros del historial, sin paginar: una fila por línea de operación. */
+    exportarOperaciones(entrada: EntradaHistorial): Promise<LineaExportable[]> {
+      return repositorio.listarLineas(consultaDesdeFiltro(filtroDesdeEntrada(entrada)));
+    },
+
     /** Filtros inválidos se ignoran en lugar de fallar: vienen de la URL. */
     async consultarHistorial(entrada: EntradaHistorial): Promise<Historial> {
       const filtro = filtroDesdeEntrada(entrada);
-      const consulta: FiltroHistorial = {
-        tipo: filtro.tipo,
-        materialId: filtro.materialId,
-        desde: filtro.desde ? inicioDiaNegocio(filtro.desde) : undefined,
-        hasta: filtro.hasta ? inicioDiaNegocio(sumarDias(filtro.hasta, 1)) : undefined,
-      };
+      const consulta = consultaDesdeFiltro(filtro);
       const antesDe = Number(entrada.antesDe);
       // Se pide uno de más para saber si existe una página siguiente.
       const [filas, resumen] = await Promise.all([
