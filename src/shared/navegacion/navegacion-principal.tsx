@@ -33,6 +33,13 @@ const ICONOS: Record<Seccion["href"], React.ReactNode> = {
       <path d="M17 5a3.5 3.5 0 0 1 0 7M19 20c0-2.5-1.5-4-3-4.8" />
     </>
   ),
+  "/gastos": (
+    <>
+      <rect x="3" y="6" width="18" height="12" rx="2" />
+      <circle cx="12" cy="12" r="2.5" />
+      <path d="M6 9v.01M18 15v.01" />
+    </>
+  ),
   "/usuarios": (
     <>
       <circle cx="12" cy="8" r="4" />

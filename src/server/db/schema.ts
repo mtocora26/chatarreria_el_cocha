@@ -208,3 +208,50 @@ export const lineasTransaccion = pgTable(
     check("lineas_transaccion_equivalencia_positiva", sql`${t.equivalenciaKg} > 0`),
   ],
 );
+
+export const categoriasGasto = pgTable(
+  "categorias_gasto",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    nombre: text().notNull(),
+    // restrict en gastos: una categoría con gastos se desactiva, no se borra.
+    activo: boolean().notNull().default(true),
+    ...marcasDeTiempo,
+  },
+  (t) => [uniqueIndex("categorias_gasto_nombre_unico").on(sql`lower(${t.nombre})`)],
+);
+
+export const gastos = pgTable(
+  "gastos",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    fecha: timestamp({ withTimezone: true }).notNull(),
+    categoriaId: uuid()
+      .notNull()
+      .references(() => categoriasGasto.id, { onDelete: "restrict" }),
+    monto: dinero().notNull(),
+    descripcion: text(),
+    // A quién se pagó; texto libre porque puede ser un trabajador o un proveedor ocasional.
+    pagadoA: text(),
+    medioPago: text(),
+    estado: estadoTransaccion().notNull().default("activa"),
+    // Igual que las operaciones: los gastos no se borran ni se editan, se anulan con rastro.
+    anuladoEn: timestamp({ withTimezone: true }),
+    anuladoPor: text().references(() => authUser.id, { onDelete: "restrict" }),
+    motivoAnulacion: text(),
+    creadoPor: text()
+      .notNull()
+      .references(() => authUser.id, { onDelete: "restrict" }),
+    ...marcasDeTiempo,
+  },
+  (t) => [
+    index("gastos_fecha_idx").on(t.fecha),
+    index("gastos_categoria_idx").on(t.categoriaId),
+    check("gastos_monto_positivo", sql`${t.monto} > 0`),
+    check(
+      "gastos_anulacion_completa",
+      sql`(${t.estado} = 'activa' AND ${t.anuladoEn} IS NULL AND ${t.anuladoPor} IS NULL AND ${t.motivoAnulacion} IS NULL)
+        OR (${t.estado} = 'anulada' AND ${t.anuladoEn} IS NOT NULL AND ${t.anuladoPor} IS NOT NULL AND ${t.motivoAnulacion} IS NOT NULL)`,
+    ),
+  ],
+);

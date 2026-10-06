@@ -50,6 +50,13 @@
       "when": 1791061099743,
       "tag": "0006_blue_iron_fist",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791167583328,
+      "tag": "0007_gastos",
+      "breakpoints": true
     }
   ]
 }
