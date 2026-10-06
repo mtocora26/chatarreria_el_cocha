@@ -55,6 +55,9 @@ export function crearCasosDeUsoGastos(repositorio: RepositorioGastos) {
   });
 
   return {
+    /** Gastos activos de un período ya convertido a instantes. */
+    resumirGastos: (filtro: FiltroGastos) => repositorio.resumir(filtro),
+
     listarCategorias: () => repositorio.listarCategorias(),
     listarCategoriasActivas: () => repositorio.listarCategorias({ soloActivas: true }),
 

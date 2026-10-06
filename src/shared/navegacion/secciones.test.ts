@@ -18,6 +18,7 @@ describe("seccionesPara", () => {
       "/terceros",
       "/gastos",
       "/capital",
+      "/rentabilidad",
       "/usuarios",
     ]);
   });
