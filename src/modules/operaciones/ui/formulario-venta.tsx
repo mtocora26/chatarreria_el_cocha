@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { parsearPesos, type Pesos } from "@/shared/dominio/dinero";
 import {
   calcularSubtotal,
@@ -22,7 +22,8 @@ import {
 import { useErroresVisibles } from "./errores";
 import type { AccionFormularioOperacion } from "./estado-formulario";
 import { useLineas, type DatosLinea } from "./lineas";
-import { SelectorMaterial } from "./selector-material";
+import { SelectorMaterial, type OpcionMaterial } from "./selector-material";
+import { SelectorTercero } from "./selector-tercero";
 
 export type MaterialParaVenta = {
   id: string;
@@ -34,12 +35,21 @@ export type MaterialParaVenta = {
 type FormularioVentaProps = {
   accion: AccionFormularioOperacion;
   materiales: MaterialParaVenta[];
-  inicial?: { lineas: DatosLinea[] };
+  /** Clientes elegibles. */
+  terceros: OpcionMaterial[];
+  inicial?: { lineas: DatosLinea[]; terceroId: string };
   correccion?: CorreccionEnCurso;
 };
 
-export function FormularioVenta({ accion, materiales, inicial, correccion }: FormularioVentaProps) {
+export function FormularioVenta({
+  accion,
+  materiales,
+  terceros,
+  inicial,
+  correccion,
+}: FormularioVentaProps) {
   const [estado, enviar, enviando] = useActionState(accion, {});
+  const [terceroId, setTerceroId] = useState(inicial?.terceroId ?? "");
   const { lineas, agregar, quitar, actualizar } = useLineas(inicial?.lineas);
   const { hayErrores, error, marcarEditado } = useErroresVisibles(estado);
 
@@ -68,6 +78,17 @@ export function FormularioVenta({ accion, materiales, inicial, correccion }: For
       {correccion && (
         <BloqueCorreccion tipo="venta" correccion={correccion} error={error("motivo")} />
       )}
+
+      <SelectorTercero
+        tipo="venta"
+        opciones={terceros}
+        valor={terceroId}
+        onElegir={(id) => {
+          setTerceroId(id);
+          marcarEditado("terceroId");
+        }}
+        error={error("terceroId")}
+      />
 
       <fieldset className="space-y-3">
         <legend className="sr-only">Materiales</legend>

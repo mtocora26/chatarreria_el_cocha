@@ -73,6 +73,8 @@ export const esquemaVenta = z.object({
 
 // Lo que llega del formulario, todavía sin validar.
 export type EntradaVenta = {
+  /** Vacío si la operación no tiene tercero. */
+  terceroId?: string;
   lineas: {
     materialId: string;
     pesoKg: string;
@@ -83,6 +85,7 @@ export type EntradaVenta = {
 };
 
 export type EntradaCompra = {
+  terceroId?: string;
   tarifa: string;
   lineas: {
     materialId: string;

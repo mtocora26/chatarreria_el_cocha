@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
 import { materiales } from "@/modules/materiales";
+import { sirvePara, terceros } from "@/modules/terceros";
 import { operaciones } from "@/modules/operaciones";
 import { lineasParaCorregir } from "@/modules/operaciones/ui/correccion";
 import { FormularioCompra } from "@/modules/operaciones/ui/formulario-compra";
@@ -22,12 +23,13 @@ export default async function PaginaCompras({ searchParams }: PageProps<"/compra
   const sesion = await exigirSesion();
   await connection();
   const { corregir } = await searchParams;
-  const [activos, recientes, original] = await Promise.all([
+  const [activos, recientes, original, todosTerceros] = await Promise.all([
     materiales.listarMaterialesActivos(),
     operaciones.listarRecientes("compra"),
     typeof corregir === "string" && esAdmin(sesion)
       ? operaciones.obtenerDetalle(corregir)
       : Promise.resolve(null),
+    terceros.listarTerceros(),
   ]);
   const corrigiendo = original?.tipo === "compra" && original.estado === "activa" ? original : null;
 
@@ -46,6 +48,9 @@ export default async function PaginaCompras({ searchParams }: PageProps<"/compra
         accion={registrarCompraAccion}
         crearMaterial={crearMaterialDesdeCompraAccion}
         reactivarMaterial={reactivarMaterialDesdeCompraAccion}
+        terceros={todosTerceros
+          .filter((t) => sirvePara(t, "compra"))
+          .map((t) => ({ id: t.id, nombre: t.nombre, detalle: t.documento ?? undefined }))}
         materiales={activos.map(({ id, nombre, precioCompraMinorista, precioCompraMayorista }) => ({
           id,
           nombre,
@@ -57,6 +62,7 @@ export default async function PaginaCompras({ searchParams }: PageProps<"/compra
             ? {
                 tarifa: corrigiendo.lineas[0]?.tarifa ?? "minorista",
                 lineas: lineasParaCorregir(corrigiendo),
+                terceroId: corrigiendo.tercero?.id ?? "",
               }
             : undefined
         }

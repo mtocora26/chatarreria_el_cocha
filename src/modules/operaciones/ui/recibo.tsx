@@ -24,6 +24,14 @@ export function Recibo({ operacion }: { operacion: DetalleOperacion }) {
           <dd className="font-mono font-semibold">{numeroRecibo(operacion.consecutivo)}</dd>
           <dt className="text-stone-600">Fecha</dt>
           <dd>{formatearFechaHora(operacion.fecha)}</dd>
+          {operacion.tercero && (
+            <>
+              <dt className="text-stone-600">
+                {operacion.tipo === "compra" ? "Proveedor" : "Cliente"}
+              </dt>
+              <dd>{operacion.tercero.nombre}</dd>
+            </>
+          )}
           {tarifa && (
             <>
               <dt className="text-stone-600">Tarifa</dt>

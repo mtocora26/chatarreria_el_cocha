@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
 import { materiales } from "@/modules/materiales";
+import { sirvePara, terceros } from "@/modules/terceros";
 import { operaciones } from "@/modules/operaciones";
 import { lineasParaCorregir } from "@/modules/operaciones/ui/correccion";
 import { FormularioVenta } from "@/modules/operaciones/ui/formulario-venta";
@@ -19,15 +20,19 @@ export default async function PaginaVentas({ searchParams }: PageProps<"/ventas"
   const sesion = await medirTiempo("ventas", "sesion", exigirSesion);
   await connection();
   const { corregir } = await searchParams;
-  const [activos, stock, recientes, original] = await medirTiempo("ventas", "datos_total", () =>
-    Promise.all([
-      medirTiempo("ventas", "materiales_activos", () => materiales.listarMaterialesActivos()),
-      medirTiempo("ventas", "stock", () => operaciones.consultarStock()),
-      medirTiempo("ventas", "ventas_recientes", () => operaciones.listarRecientes("venta")),
-      typeof corregir === "string" && esAdmin(sesion)
-        ? medirTiempo("ventas", "detalle_correccion", () => operaciones.obtenerDetalle(corregir))
-        : Promise.resolve(null),
-    ]),
+  const [activos, stock, recientes, original, todosTerceros] = await medirTiempo(
+    "ventas",
+    "datos_total",
+    () =>
+      Promise.all([
+        medirTiempo("ventas", "materiales_activos", () => materiales.listarMaterialesActivos()),
+        medirTiempo("ventas", "stock", () => operaciones.consultarStock()),
+        medirTiempo("ventas", "ventas_recientes", () => operaciones.listarRecientes("venta")),
+        typeof corregir === "string" && esAdmin(sesion)
+          ? medirTiempo("ventas", "detalle_correccion", () => operaciones.obtenerDetalle(corregir))
+          : Promise.resolve(null),
+        medirTiempo("ventas", "terceros", () => terceros.listarTerceros()),
+      ]),
   );
   const corrigiendo = original?.tipo === "venta" && original.estado === "activa" ? original : null;
   // Al corregir, lo vendido en la original vuelve a estar disponible para la nueva.
@@ -62,7 +67,17 @@ export default async function PaginaVentas({ searchParams }: PageProps<"/ventas"
             precioVenta,
             stock: stock.get(id) ?? 0,
           }))}
-          inicial={corrigiendo ? { lineas: lineasParaCorregir(corrigiendo) } : undefined}
+          terceros={todosTerceros
+            .filter((t) => sirvePara(t, "venta"))
+            .map((t) => ({ id: t.id, nombre: t.nombre, detalle: t.documento ?? undefined }))}
+          inicial={
+            corrigiendo
+              ? {
+                  lineas: lineasParaCorregir(corrigiendo),
+                  terceroId: corrigiendo.tercero?.id ?? "",
+                }
+              : undefined
+          }
           correccion={
             corrigiendo ? { id: corrigiendo.id, consecutivo: corrigiendo.consecutivo } : undefined
           }

@@ -18,7 +18,8 @@ import { DialogoNuevoMaterial, type ResultadoNuevoMaterial } from "./dialogo-nue
 import { useErroresVisibles } from "./errores";
 import type { AccionFormularioOperacion } from "./estado-formulario";
 import { useLineas, type DatosLinea } from "./lineas";
-import { SelectorMaterial } from "./selector-material";
+import { SelectorMaterial, type OpcionMaterial } from "./selector-material";
+import { SelectorTercero } from "./selector-tercero";
 
 export type MaterialParaCompra = {
   id: string;
@@ -30,9 +31,11 @@ export type MaterialParaCompra = {
 type FormularioCompraProps = {
   accion: AccionFormularioOperacion;
   materiales: MaterialParaCompra[];
+  /** Proveedores elegibles. */
+  terceros: OpcionMaterial[];
   crearMaterial: (nombre: string, precio: string) => Promise<ResultadoNuevoMaterial>;
   reactivarMaterial: (id: string) => Promise<ResultadoNuevoMaterial>;
-  inicial?: { tarifa: Tarifa; lineas: DatosLinea[] };
+  inicial?: { tarifa: Tarifa; lineas: DatosLinea[]; terceroId: string };
   correccion?: CorreccionEnCurso;
 };
 
@@ -48,12 +51,14 @@ const precioSegun = (material: MaterialParaCompra | undefined, tarifa: Tarifa) =
 export function FormularioCompra({
   accion,
   materiales,
+  terceros,
   crearMaterial,
   reactivarMaterial,
   inicial,
   correccion,
 }: FormularioCompraProps) {
   const [estado, enviar, enviando] = useActionState(accion, {});
+  const [terceroId, setTerceroId] = useState(inicial?.terceroId ?? "");
   const [tarifa, setTarifa] = useState<Tarifa>(inicial?.tarifa ?? "minorista");
   // Los materiales creados desde aquí se suman sin recargar la página.
   const [catalogo, setCatalogo] = useState(materiales);
@@ -96,6 +101,17 @@ export function FormularioCompra({
       {correccion && (
         <BloqueCorreccion tipo="compra" correccion={correccion} error={error("motivo")} />
       )}
+
+      <SelectorTercero
+        tipo="compra"
+        opciones={terceros}
+        valor={terceroId}
+        onElegir={(id) => {
+          setTerceroId(id);
+          marcarEditado("terceroId");
+        }}
+        error={error("terceroId")}
+      />
 
       <fieldset>
         <legend className="mb-2 text-sm font-medium text-stone-700">Tarifa de compra</legend>

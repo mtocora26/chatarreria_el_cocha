@@ -21,6 +21,8 @@ export type NuevaOperacion = {
   tipo: TipoOperacion;
   lineas: LineaOperacion[];
   total: Pesos;
+  /** Cliente o proveedor de la operación; opcional. */
+  terceroId?: string | null;
 };
 
 export type ErrorOperacion =
