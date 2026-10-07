@@ -49,7 +49,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
                 unoptimized
                 className="rounded-lg"
               />
-              <span>
+              <span className="sm:max-md:sr-only">
                 El Cocha
                 <span className="text-marca-100 hidden font-normal lg:inline"> · Chatarrería</span>
               </span>

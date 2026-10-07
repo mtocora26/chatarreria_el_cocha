@@ -78,3 +78,20 @@ export const SECCIONES: readonly Seccion[] = [
 export function seccionesPara(esAdmin: boolean): readonly Seccion[] {
   return SECCIONES.filter((seccion) => esAdmin || !seccion.soloAdmin);
 }
+
+/** Cuántas secciones caben en la barra sin menú "Más" (el pulgar y el ancho del encabezado alcanzan para 5). */
+const MAXIMO_SIN_MENU = 5;
+const VISIBLES_CON_MENU = MAXIMO_SIN_MENU - 1;
+
+/** Separa las secciones de uso diario de las demás, que van en el menú "Más". */
+export function dividirSecciones(esAdmin: boolean): {
+  visibles: readonly Seccion[];
+  resto: readonly Seccion[];
+} {
+  const secciones = seccionesPara(esAdmin);
+  if (secciones.length <= MAXIMO_SIN_MENU) return { visibles: secciones, resto: [] };
+  return {
+    visibles: secciones.slice(0, VISIBLES_CON_MENU),
+    resto: secciones.slice(VISIBLES_CON_MENU),
+  };
+}
