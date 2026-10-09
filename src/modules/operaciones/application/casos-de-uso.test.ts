@@ -54,6 +54,7 @@ function preparar(stockDisponible = new Map<string, number>()) {
       ventas: { cantidad: 0, total: 0 },
       anuladas: 0,
     }),
+    listarLineas: async () => [],
     anular: async () => ({ ok: true, valor: undefined }),
     guardarCorreccion: async (_id, operacion) => {
       guardadas.push(operacion);

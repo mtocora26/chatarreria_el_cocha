@@ -361,6 +361,44 @@ export function crearRepositorioOperaciones(obtenerDb: () => BaseDeDatos): Repos
       return filas.map((fila) => ({ ...fila, total: pesosDesdeNumeric(fila.total) }));
     },
 
+    async listarLineas(filtro) {
+      const db = obtenerDb();
+      const filas = await db
+        .select({
+          consecutivo: transacciones.consecutivo,
+          fecha: transacciones.fecha,
+          tipo: transacciones.tipo,
+          estado: transacciones.estado,
+          tercero: terceros.nombre,
+          material: materiales.nombre,
+          pesoKg: lineasTransaccion.pesoKg,
+          precioUnitario: lineasTransaccion.precioUnitario,
+          subtotal: lineasTransaccion.subtotal,
+        })
+        .from(lineasTransaccion)
+        .innerJoin(transacciones, eq(transacciones.id, lineasTransaccion.transaccionId))
+        .innerJoin(materiales, eq(materiales.id, lineasTransaccion.materialId))
+        .leftJoin(terceros, eq(terceros.id, transacciones.terceroId))
+        .where(and(...condicionesHistorial(filtro, db)))
+        .orderBy(
+          asc(transacciones.consecutivo),
+          asc(materiales.nombre),
+          asc(lineasTransaccion.pesoKg),
+        );
+
+      return filas.map((f) => ({
+        consecutivo: f.consecutivo,
+        fecha: f.fecha,
+        tipo: f.tipo,
+        estado: f.estado,
+        tercero: f.tercero,
+        material: f.material,
+        gramos: gramosDesdeNumeric(f.pesoKg),
+        precioPorKg: pesosDesdeNumeric(f.precioUnitario),
+        subtotal: pesosDesdeNumeric(f.subtotal),
+      }));
+    },
+
     async resumir(filtro) {
       const db = obtenerDb();
       const filas = await db

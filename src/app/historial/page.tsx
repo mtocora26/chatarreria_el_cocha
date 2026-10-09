@@ -52,6 +52,12 @@ export default async function PaginaHistorial({ searchParams }: PageProps<"/hist
   );
   const { filtro, resumen } = historial;
 
+  const consultaExportar = new URLSearchParams(
+    Object.entries(filtro).filter(
+      (par): par is [string, string] => typeof par[1] === "string" && par[1] !== "",
+    ),
+  ).toString();
+
   const hoy = diaNegocio(new Date());
   const periodos = [
     { etiqueta: "Hoy", desde: hoy, hasta: hoy },
@@ -180,6 +186,17 @@ export default async function PaginaHistorial({ searchParams }: PageProps<"/hist
           <p className="text-xs text-stone-500">No cuentan en los totales</p>
         </div>
       </section>
+
+      <p className="mb-3 flex justify-end">
+        {/* <a> y no <Link>: es una descarga, no una navegación que se pueda precargar. */}
+        <a
+          href={`/historial/exportar${consultaExportar ? `?${consultaExportar}` : ""}`}
+          download
+          className={claseBotonSecundario}
+        >
+          Descargar para Excel
+        </a>
+      </p>
 
       <ListaOperaciones
         operaciones={historial.operaciones}
