@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { claseInput } from "@/shared/ui/estilos";
 
 export type OpcionMaterial = {
@@ -25,6 +25,10 @@ type SelectorMaterialProps = {
   placeholder?: string;
   sinResultados?: string;
 };
+
+// Alto de la lista (max-h-64) y de las barras fijas (total + navegación) que la pueden tapar.
+const ALTO_LISTA = 256;
+const ALTO_BARRAS_FIJAS = 160;
 
 /** Minúsculas y sin tildes: "cobre" encuentra "Cóbre". */
 export function normalizar(texto: string): string {
@@ -56,6 +60,18 @@ export function SelectorMaterial({
   const [busqueda, setBusqueda] = useState<string | null>(null);
   const [abierto, setAbierto] = useState(false);
   const [activo, setActivo] = useState(0);
+  const [haciaArriba, setHaciaArriba] = useState(false);
+  const campo = useRef<HTMLInputElement>(null);
+
+  // Si abajo no cabe la lista sin quedar bajo las barras fijas, se abre hacia arriba.
+  function abrir() {
+    if (campo.current) {
+      const caja = campo.current.getBoundingClientRect();
+      const abajo = window.innerHeight - caja.bottom - ALTO_BARRAS_FIJAS;
+      setHaciaArriba(abajo < ALTO_LISTA && caja.top > abajo);
+    }
+    setAbierto(true);
+  }
 
   const texto = busqueda ?? elegido?.nombre ?? "";
   const consulta = normalizar(busqueda ?? "");
@@ -87,12 +103,12 @@ export function SelectorMaterial({
     switch (evento.key) {
       case "ArrowDown":
         evento.preventDefault();
-        setAbierto(true);
+        abrir();
         setActivo(abierto ? (indiceActivo + 1) % Math.max(total, 1) : 0);
         break;
       case "ArrowUp":
         evento.preventDefault();
-        setAbierto(true);
+        abrir();
         setActivo((indiceActivo - 1 + total) % Math.max(total, 1));
         break;
       case "Enter":
@@ -120,6 +136,7 @@ export function SelectorMaterial({
       </label>
       <input type="hidden" name={nombreCampo} value={valor} />
       <input
+        ref={campo}
         id={id}
         type="text"
         role="combobox"
@@ -133,12 +150,12 @@ export function SelectorMaterial({
         value={texto}
         onChange={(e) => {
           setBusqueda(e.target.value);
-          setAbierto(true);
+          abrir();
           setActivo(0);
         }}
         onFocus={(e) => {
           e.target.select();
-          setAbierto(true);
+          abrir();
         }}
         onBlur={cerrar}
         onKeyDown={alPresionarTecla}
@@ -149,7 +166,9 @@ export function SelectorMaterial({
           id={idLista}
           role="listbox"
           aria-label={etiqueta}
-          className="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-lg border border-stone-200 bg-white py-1 shadow-lg"
+          className={`absolute z-40 max-h-64 w-full overflow-auto rounded-lg border border-stone-200 bg-white py-1 shadow-lg ${
+            haciaArriba ? "bottom-full mb-1" : "mt-1"
+          }`}
         >
           {filtradas.map((opcion, indice) => (
             <li

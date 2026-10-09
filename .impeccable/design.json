@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-07T00:00:00Z",
+  "title": "Design System: Chatarrería El Cocha",
+  "extensions": {
+    "colorMeta": {
+      "marca-900": { "role": "primary", "displayName": "Verde Bosque de Patio", "canonical": "#24342e", "tonalRamp": ["#172420", "#24342e", "#2f443c", "#3d584d", "#567266", "#a2b3aa", "#e3e9e5", "#f1f4f2"] },
+      "oro-500": { "role": "secondary", "displayName": "Oro de Sello", "canonical": "#d7a747", "tonalRamp": ["#5c4416", "#8a6620", "#b8892f", "#d7a747", "#e4c077", "#efd8a6", "#f6ecd6", "#fbf6ea"] },
+      "fondo": { "role": "neutral", "displayName": "Hueso Cálido", "canonical": "#f5f4ef", "tonalRamp": ["#1c1917", "#44403c", "#78716c", "#a8a29e", "#d6d3d1", "#e7e5e4", "#f5f4ef", "#ffffff"] }
+    },
+    "typographyMeta": {
+      "headline": { "displayName": "Título de página", "purpose": "H1 de cada pantalla." },
+      "body": { "displayName": "Cuerpo", "purpose": "Contenido, tablas y formularios." }
+    },
+    "shadows": [
+      { "name": "shadow-sm", "value": "0 1px 2px 0 rgb(0 0 0 / 0.05)", "purpose": "Única elevación: tarjetas, campos, botones llenos, encabezado." }
+    ],
+    "motion": [
+      { "name": "transition-colors", "value": "color/background/border 150ms cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Hover y estados de botones y navegación." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botón primario", "kind": "button", "refersTo": "button-primary",
+      "description": "Acción principal de cada formulario.",
+      "html": "<button class=\"ds-btn-primary\">Guardar compra</button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:8px 16px;border:0;border-radius:8px;background:#24342e;color:#fff;font-size:14px;font-weight:600;box-shadow:0 1px 2px rgb(0 0 0/.05);transition:background-color .15s}.ds-btn-primary:hover{background:#2f443c}.ds-btn-primary:focus-visible{outline:none;box-shadow:0 0 0 2px #f5f4ef,0 0 0 4px #d7a747}"
+    },
+    {
+      "name": "Botón secundario", "kind": "button", "refersTo": "button-secondary",
+      "description": "Acción alternativa o de cancelar.",
+      "html": "<button class=\"ds-btn-secondary\">Cancelar</button>",
+      "css": ".ds-btn-secondary{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:8px 16px;border:1px solid #d6d3d1;border-radius:8px;background:#fff;color:#44403c;font-size:14px;font-weight:600;transition:background-color .15s}.ds-btn-secondary:hover{background:#f5f5f4}.ds-btn-secondary:focus-visible{outline:none;box-shadow:0 0 0 2px #f5f4ef,0 0 0 4px #d7a747}"
+    },
+    {
+      "name": "Campo de texto", "kind": "input", "refersTo": "input",
+      "description": "Control de formulario con etiqueta.",
+      "html": "<label class=\"ds-label\" for=\"k\">Peso (kg)</label><input id=\"k\" class=\"ds-input\" placeholder=\"0,00\">",
+      "css": ".ds-label{display:block;margin-bottom:4px;font-size:14px;font-weight:500;color:#44403c}.ds-input{display:block;width:100%;min-height:44px;padding:8px 12px;border:1px solid #d6d3d1;border-radius:8px;background:#fff;color:#1c1917;font-size:14px;box-shadow:0 1px 2px rgb(0 0 0/.05)}.ds-input::placeholder{color:#a8a29e}.ds-input:focus{outline:none;border-color:#567266;box-shadow:0 0 0 2px rgb(215 167 71/.4)}"
+    },
+    {
+      "name": "Tarjeta", "kind": "card", "refersTo": "card",
+      "description": "Contenedor blanco para resúmenes y listas.",
+      "html": "<div class=\"ds-card\">Total del día</div>",
+      "css": ".ds-card{padding:16px;border:1px solid #e7e5e4;border-radius:12px;background:#fff;box-shadow:0 1px 2px rgb(0 0 0/.05);color:#1c1917;font-size:14px}"
+    },
+    {
+      "name": "Elemento de navegación activo", "kind": "nav", "refersTo": "nav-item-active",
+      "description": "Navegación del encabezado sobre verde; activo en oro.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-a\">Compras</a><a class=\"ds-nav-a ds-on\">Ventas</a></nav>",
+      "css": ".ds-nav{display:flex;gap:4px;padding:8px;background:#24342e}.ds-nav-a{display:flex;align-items:center;min-height:40px;padding:0 12px;border-radius:8px;color:#e3e9e5;font-size:14px;font-weight:500;transition:background-color .15s}.ds-nav-a:hover{background:#2f443c;color:#fff}.ds-on{background:#d7a747;color:#172420}"
+    },
+    {
+      "name": "Insignia", "kind": "chip", "refersTo": "card",
+      "description": "Estado corto en píldora.",
+      "html": "<span class=\"ds-badge\">Activo</span>",
+      "css": ".ds-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:9999px;background:#e3e9e5;color:#24342e;font-size:12px;font-weight:600}"
+    }
+  ],
+  "narrative": {
+    "northStar": "La Báscula Confiable",
+    "overview": "Una herramienta de mostrador: sobria, legible, sin adornos. Todo gira en torno a que una cifra se lea de un vistazo y se registre en pocos toques. El verde bosque profundo da seriedad de oficio; el oro aparece como sello y marca de lo activo, nunca como decoración.",
+    "keyCharacteristics": ["Verde bosque + oro sobre fondo hueso cálido; neutros tipo piedra.", "Plano con sombra mínima: borde fino y shadow-sm.", "Objetivos táctiles de 44 px; pensado para celular y mostrador.", "Una sola familia tipográfica (Geist).", "Español directo, sin jerga."],
+    "rules": [
+      { "name": "The Oro Es Sello Rule", "body": "El oro marca lo activo o enfocado (navegación, foco). No se usa como relleno de botones ni como decoración.", "section": "colors" },
+      { "name": "The Rojo Solo Para Peligro Rule", "body": "El rojo se reserva a errores y acciones destructivas.", "section": "colors" },
+      { "name": "The 16px En Campos Rule", "body": "Los controles de formulario usan 16px en móvil y 14px desde sm.", "section": "typography" },
+      { "name": "The Plano Con Sombra Mínima Rule", "body": "Nada supera shadow-sm en reposo.", "section": "elevation" }
+    ],
+    "dos": ["Do mantener 44px de alto mínimo en todo lo que se toca.", "Do usar el verde de marca para la acción principal y el oro solo para estado activo y foco.", "Do usar el color de borde y shadow-sm para separar superficies.", "Do mostrar cifras con claridad y jerarquía de tamaño/peso.", "Do reutilizar las clases compartidas de src/shared/ui/estilos.ts."],
+    "donts": ["Don't usar rojo para nada que no sea error o acción destructiva.", "Don't rellenar botones o fondos grandes de oro.", "Don't añadir sombras mayores a shadow-sm ni efectos de desenfoque.", "Don't introducir una segunda familia tipográfica sin una razón del producto.", "Don't reducir campos móviles por debajo de 16px de texto."]
+  }
+}

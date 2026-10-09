@@ -19,6 +19,25 @@
   --color-fondo: #f5f4ef;
 }
 
+/* Curva fuerte de salida: el menú responde al instante y frena suave. */
+@keyframes menu-entrada {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.97);
+  }
+}
+
+.menu-entrada {
+  animation: menu-entrada 160ms cubic-bezier(0.23, 1, 0.32, 1);
+  transform-origin: var(--origen-menu, top right);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-entrada {
+    animation: none;
+  }
+}
+
 body {
   @apply bg-fondo font-sans text-stone-900;
 }
